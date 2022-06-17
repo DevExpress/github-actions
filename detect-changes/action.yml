@@ -1,0 +1,28 @@
+name: Detect Changes
+
+inputs:
+  path:
+    description: Path to directory or file to check for changes
+    required: true
+
+outputs:
+  changed:
+    description: 'true' if changes detected
+    value: ${{ steps.detection.outputs.changed }}
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      id: detection
+      run: |
+        diff=$( git diff HEAD^ --name-only -- ${{ github.event.inputs.path }} )
+
+        if [ "$diff" == "" ]
+        then
+          echo "::set-output name=changed::false"
+          echo "No changes detected"
+          exit 0
+        fi
+
+        echo "::set-output name=changed::true"
