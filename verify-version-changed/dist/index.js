@@ -9086,7 +9086,6 @@ function run() {
             }
             core.info(`Base commit: ${base}`);
             core.info(`Head commit: ${head}`);
-            core.info(JSON.stringify(github_1.context));
             // https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---word-diffltmodegt
             const { stdout, stderr, exitCode } = yield (0, exec_1.getExecOutput)(`git diff --word-diff ${base} ${head} ${packageJsonPath}`);
             if (exitCode !== 0) {

@@ -34,8 +34,6 @@ async function run(): Promise<void> {
         core.info(`Base commit: ${base}`)
         core.info(`Head commit: ${head}`)
 
-        core.info(JSON.stringify(context))
-
         // https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---word-diffltmodegt
         const { stdout, stderr, exitCode } = await getExecOutput(`git diff --word-diff ${base} ${head} ${packageJsonPath}`)
 
