@@ -23,10 +23,9 @@
     "package"
   ],
   "devDependencies": {
-    "@octokit/rest": "^19.0.4",
     "@types/node": "^16.11.7",
     "@types/semver": "^7.3.12",
-    "@zeit/ncc": "^0.22.3",
+    "@vercel/ncc": "^0.34.0",
     "rimraf": "^3.0.2",
     "typescript": "^4.8.4"
   },
