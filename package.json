@@ -13,9 +13,9 @@
     "url": "https://github.com/DevExpress/github-actions/issues"
   },
   "scripts": {
-    "clean": "yarn workspaces run clean",
-    "build": "yarn workspaces run build",
-    "package": "yarn workspaces run package"
+    "clean": "npm run clean --workspaces",
+    "build": "npm run build --workspaces",
+    "package": "npm run package --workspaces"
   },
   "pre-commit": [
     "clean",

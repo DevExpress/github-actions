@@ -5614,63 +5614,67 @@ exports.request = request;
 /***/ 5007:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var register = __nccwpck_require__(4476)
-var addHook = __nccwpck_require__(9387)
-var removeHook = __nccwpck_require__(9771)
+var register = __nccwpck_require__(4476);
+var addHook = __nccwpck_require__(9387);
+var removeHook = __nccwpck_require__(9771);
 
 // bind with array of arguments: https://stackoverflow.com/a/21792913
-var bind = Function.bind
-var bindable = bind.bind(bind)
+var bind = Function.bind;
+var bindable = bind.bind(bind);
 
-function bindApi (hook, state, name) {
-  var removeHookRef = bindable(removeHook, null).apply(null, name ? [state, name] : [state])
-  hook.api = { remove: removeHookRef }
-  hook.remove = removeHookRef
-
-  ;['before', 'error', 'after', 'wrap'].forEach(function (kind) {
-    var args = name ? [state, kind, name] : [state, kind]
-    hook[kind] = hook.api[kind] = bindable(addHook, null).apply(null, args)
-  })
+function bindApi(hook, state, name) {
+  var removeHookRef = bindable(removeHook, null).apply(
+    null,
+    name ? [state, name] : [state]
+  );
+  hook.api = { remove: removeHookRef };
+  hook.remove = removeHookRef;
+  ["before", "error", "after", "wrap"].forEach(function (kind) {
+    var args = name ? [state, kind, name] : [state, kind];
+    hook[kind] = hook.api[kind] = bindable(addHook, null).apply(null, args);
+  });
 }
 
-function HookSingular () {
-  var singularHookName = 'h'
+function HookSingular() {
+  var singularHookName = "h";
   var singularHookState = {
-    registry: {}
-  }
-  var singularHook = register.bind(null, singularHookState, singularHookName)
-  bindApi(singularHook, singularHookState, singularHookName)
-  return singularHook
+    registry: {},
+  };
+  var singularHook = register.bind(null, singularHookState, singularHookName);
+  bindApi(singularHook, singularHookState, singularHookName);
+  return singularHook;
 }
 
-function HookCollection () {
+function HookCollection() {
   var state = {
-    registry: {}
-  }
+    registry: {},
+  };
 
-  var hook = register.bind(null, state)
-  bindApi(hook, state)
+  var hook = register.bind(null, state);
+  bindApi(hook, state);
 
-  return hook
+  return hook;
 }
 
-var collectionHookDeprecationMessageDisplayed = false
-function Hook () {
+var collectionHookDeprecationMessageDisplayed = false;
+function Hook() {
   if (!collectionHookDeprecationMessageDisplayed) {
-    console.warn('[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4')
-    collectionHookDeprecationMessageDisplayed = true
+    console.warn(
+      '[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4'
+    );
+    collectionHookDeprecationMessageDisplayed = true;
   }
-  return HookCollection()
+  return HookCollection();
 }
 
-Hook.Singular = HookSingular.bind()
-Hook.Collection = HookCollection.bind()
+Hook.Singular = HookSingular.bind();
+Hook.Collection = HookCollection.bind();
 
-module.exports = Hook
+module.exports = Hook;
 // expose constructors as a named property for TypeScript
-module.exports.Hook = Hook
-module.exports.Singular = Hook.Singular
-module.exports.Collection = Hook.Collection
+module.exports.Hook = Hook;
+module.exports.Singular = Hook.Singular;
+module.exports.Collection = Hook.Collection;
 
 
 /***/ }),
@@ -8358,6 +8362,7 @@ const isX = id => !id || id.toLowerCase() === 'x' || id === '*'
 // ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0-0
 // ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0-0
 // ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0-0
+// ~0.0.1 --> >=0.0.1 <0.1.0-0
 const replaceTildes = (comp, options) =>
   comp.trim().split(/\s+/).map((c) => {
     return replaceTilde(c, options)
@@ -8397,6 +8402,8 @@ const replaceTilde = (comp, options) => {
 // ^1.2, ^1.2.x --> >=1.2.0 <2.0.0-0
 // ^1.2.3 --> >=1.2.3 <2.0.0-0
 // ^1.2.0 --> >=1.2.0 <2.0.0-0
+// ^0.0.1 --> >=0.0.1 <0.0.2-0
+// ^0.1.0 --> >=0.1.0 <0.2.0-0
 const replaceCarets = (comp, options) =>
   comp.trim().split(/\s+/).map((c) => {
     return replaceCaret(c, options)
@@ -9351,51 +9358,91 @@ module.exports = valid
 
 // just pre-load all the stuff that index.js lazily exports
 const internalRe = __nccwpck_require__(3238)
+const constants = __nccwpck_require__(4240)
+const SemVer = __nccwpck_require__(3136)
+const identifiers = __nccwpck_require__(89)
+const parse = __nccwpck_require__(1302)
+const valid = __nccwpck_require__(3742)
+const clean = __nccwpck_require__(5265)
+const inc = __nccwpck_require__(798)
+const diff = __nccwpck_require__(9270)
+const major = __nccwpck_require__(7806)
+const minor = __nccwpck_require__(1268)
+const patch = __nccwpck_require__(8838)
+const prerelease = __nccwpck_require__(5114)
+const compare = __nccwpck_require__(5563)
+const rcompare = __nccwpck_require__(5946)
+const compareLoose = __nccwpck_require__(1133)
+const compareBuild = __nccwpck_require__(646)
+const sort = __nccwpck_require__(7293)
+const rsort = __nccwpck_require__(7716)
+const gt = __nccwpck_require__(9184)
+const lt = __nccwpck_require__(2082)
+const eq = __nccwpck_require__(3397)
+const neq = __nccwpck_require__(6433)
+const gte = __nccwpck_require__(1830)
+const lte = __nccwpck_require__(8119)
+const cmp = __nccwpck_require__(4046)
+const coerce = __nccwpck_require__(9111)
+const Comparator = __nccwpck_require__(3365)
+const Range = __nccwpck_require__(9086)
+const satisfies = __nccwpck_require__(1543)
+const toComparators = __nccwpck_require__(8474)
+const maxSatisfying = __nccwpck_require__(280)
+const minSatisfying = __nccwpck_require__(5637)
+const minVersion = __nccwpck_require__(1257)
+const validRange = __nccwpck_require__(8450)
+const outside = __nccwpck_require__(9004)
+const gtr = __nccwpck_require__(1449)
+const ltr = __nccwpck_require__(3933)
+const intersects = __nccwpck_require__(4488)
+const simplifyRange = __nccwpck_require__(6159)
+const subset = __nccwpck_require__(5638)
 module.exports = {
+  parse,
+  valid,
+  clean,
+  inc,
+  diff,
+  major,
+  minor,
+  patch,
+  prerelease,
+  compare,
+  rcompare,
+  compareLoose,
+  compareBuild,
+  sort,
+  rsort,
+  gt,
+  lt,
+  eq,
+  neq,
+  gte,
+  lte,
+  cmp,
+  coerce,
+  Comparator,
+  Range,
+  satisfies,
+  toComparators,
+  maxSatisfying,
+  minSatisfying,
+  minVersion,
+  validRange,
+  outside,
+  gtr,
+  ltr,
+  intersects,
+  simplifyRange,
+  subset,
+  SemVer,
   re: internalRe.re,
   src: internalRe.src,
   tokens: internalRe.t,
-  SEMVER_SPEC_VERSION: (__nccwpck_require__(4240).SEMVER_SPEC_VERSION),
-  SemVer: __nccwpck_require__(3136),
-  compareIdentifiers: (__nccwpck_require__(89).compareIdentifiers),
-  rcompareIdentifiers: (__nccwpck_require__(89).rcompareIdentifiers),
-  parse: __nccwpck_require__(1302),
-  valid: __nccwpck_require__(3742),
-  clean: __nccwpck_require__(5265),
-  inc: __nccwpck_require__(798),
-  diff: __nccwpck_require__(9270),
-  major: __nccwpck_require__(7806),
-  minor: __nccwpck_require__(1268),
-  patch: __nccwpck_require__(8838),
-  prerelease: __nccwpck_require__(5114),
-  compare: __nccwpck_require__(5563),
-  rcompare: __nccwpck_require__(5946),
-  compareLoose: __nccwpck_require__(1133),
-  compareBuild: __nccwpck_require__(646),
-  sort: __nccwpck_require__(7293),
-  rsort: __nccwpck_require__(7716),
-  gt: __nccwpck_require__(9184),
-  lt: __nccwpck_require__(2082),
-  eq: __nccwpck_require__(3397),
-  neq: __nccwpck_require__(6433),
-  gte: __nccwpck_require__(1830),
-  lte: __nccwpck_require__(8119),
-  cmp: __nccwpck_require__(4046),
-  coerce: __nccwpck_require__(9111),
-  Comparator: __nccwpck_require__(3365),
-  Range: __nccwpck_require__(9086),
-  satisfies: __nccwpck_require__(1543),
-  toComparators: __nccwpck_require__(8474),
-  maxSatisfying: __nccwpck_require__(280),
-  minSatisfying: __nccwpck_require__(5637),
-  minVersion: __nccwpck_require__(1257),
-  validRange: __nccwpck_require__(8450),
-  outside: __nccwpck_require__(9004),
-  gtr: __nccwpck_require__(1449),
-  ltr: __nccwpck_require__(3933),
-  intersects: __nccwpck_require__(4488),
-  simplifyRange: __nccwpck_require__(6159),
-  subset: __nccwpck_require__(5638),
+  SEMVER_SPEC_VERSION: constants.SEMVER_SPEC_VERSION,
+  compareIdentifiers: identifiers.compareIdentifiers,
+  rcompareIdentifiers: identifiers.rcompareIdentifiers,
 }
 
 
