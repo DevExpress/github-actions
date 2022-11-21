@@ -4,7 +4,7 @@ description: Send Teams notifications
 inputs:
   hook_url:
     description: 'URL of MS Teams hook'
-    required: true
+    required: false
   bearer_token:
     description: 'Github token'
     required: false

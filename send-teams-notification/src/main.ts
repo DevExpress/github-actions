@@ -7,12 +7,19 @@ type GithubContext = typeof context;
 
 async function run(): Promise<void> {
     try {
-        const hook = core.getInput('hook_url', { required: true });
+        const hook = core.getInput('hook_url', { required: false });
         const alertsRaw = core.getInput('alerts', { required: false });
         const alerts = alertsRaw && JSON.parse(alertsRaw);
 
-        const webhook = new IncomingWebhook(hook);
         if (alerts) {
+            if (!hook) {
+                const msg = 'Input required and not supplied: hook_url.';
+                core.setFailed(msg);
+                console.error(msg);
+                return;
+            }
+
+            const webhook = new IncomingWebhook(hook);
             await notifyCodeQlAlerts(alerts, webhook);
         } else {
             const ghToken = core.getInput('bearer_token', { required: false });
@@ -31,12 +38,20 @@ async function run(): Promise<void> {
                 return;
             }
 
+            if (!hook) {
+                const msg = 'Input required and not supplied: hook_url.';
+                core.setFailed(msg);
+                console.error(msg);
+                return;
+            }
+
             const octokit = getOctokit(ghToken);
             const runInfo = await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{runId}', {
                 owner: repo.owner,
                 repo: repo.repo,
                 runId
             });
+            const webhook = new IncomingWebhook(hook);
 
             await notifyFailedWorkflow(runInfo.data, webhook);
         }
