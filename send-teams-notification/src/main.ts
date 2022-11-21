@@ -11,11 +11,18 @@ async function run(): Promise<void> {
         const alertsRaw = core.getInput('alerts', { required: false });
         const alerts = alertsRaw && JSON.parse(alertsRaw);
 
-        if (alerts) {
+        function checkHook() {
             if (!hook) {
                 const msg = 'Input required and not supplied: hook_url.';
                 core.setFailed(msg);
                 console.error(msg);
+                return false;
+            }
+            return true;
+        }
+
+        if (alerts) {
+            if (!checkHook()) {
                 return;
             }
 
@@ -37,11 +44,7 @@ async function run(): Promise<void> {
             if (specificBranch && specificBranch !== ref) {
                 return;
             }
-
-            if (!hook) {
-                const msg = 'Input required and not supplied: hook_url.';
-                core.setFailed(msg);
-                console.error(msg);
+            if (!checkHook()) {
                 return;
             }
 

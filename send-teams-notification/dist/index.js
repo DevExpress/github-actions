@@ -12584,11 +12584,17 @@ function run() {
             const hook = core.getInput('hook_url', { required: false });
             const alertsRaw = core.getInput('alerts', { required: false });
             const alerts = alertsRaw && JSON.parse(alertsRaw);
-            if (alerts) {
+            function checkHook() {
                 if (!hook) {
                     const msg = 'Input required and not supplied: hook_url.';
                     core.setFailed(msg);
                     console.error(msg);
+                    return false;
+                }
+                return true;
+            }
+            if (alerts) {
+                if (!checkHook()) {
                     return;
                 }
                 const webhook = new ms_teams_webhook_1.IncomingWebhook(hook);
@@ -12609,10 +12615,7 @@ function run() {
                 if (specificBranch && specificBranch !== ref) {
                     return;
                 }
-                if (!hook) {
-                    const msg = 'Input required and not supplied: hook_url.';
-                    core.setFailed(msg);
-                    console.error(msg);
+                if (!checkHook()) {
                     return;
                 }
                 const octokit = (0, github_1.getOctokit)(ghToken);
