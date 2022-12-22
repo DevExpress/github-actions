@@ -195,25 +195,25 @@ async function notifyFailedWorkflow(runInfo: any, webhook: IncomingWebhook) {
     await webhook.send(JSON.stringify({
         '@context': 'https://schema.org/extensions',
         '@type': 'MessageCard',
-        text: 'Run failed',
+        'text': 'Run failed',
         'sections': [
             {
                 'facts': [
                     {
                         'name': 'Repository',
-                        value: `[${repo.owner}/${repo.repo}](https://github.com/${repo.owner}/${repo.repo})`
+                        'value': `[${repo.owner}/${repo.repo}](https://github.com/${repo.owner}/${repo.repo})`
                     },
                     {
                         'name': 'Workflow',
-                        value: workflow
+                        'value': workflow
                     },
                     {
                         'name': 'Committer',
-                        value: runInfo.head_commit.author.name
+                        'value': runInfo.head_commit.author.name
                     },
                     {
                         'name': 'Commit',
-                        value: `[${runInfo.head_commit.message}](https://github.com/${repo.owner}/${repo.repo}/commit/${runInfo.head_commit.id})`
+                        'value': `[${runInfo.head_commit.message}](https://github.com/${repo.owner}/${repo.repo}/commit/${runInfo.head_commit.id})`
                     }
                 ]
             }
