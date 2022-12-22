@@ -21,6 +21,10 @@ inputs:
   alerts:
     description: 'Alerts JSON array'
     required: false
+  alert_type:
+    description: 'Alerts type (CodeQL, Dependabot)'
+    default: 'CodeQL'
+    required: false
   alerts_cache_file:
     description: 'Alerts cache file name'
     default: 'notify.json'

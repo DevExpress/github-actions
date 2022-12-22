@@ -2,8 +2,13 @@ import * as core from '@actions/core'
 import fs from 'fs';
 import { context, getOctokit } from '@actions/github'
 import { IncomingWebhook } from 'ms-teams-webhook';
+import { DependabotAlertDto } from './dto/dependabot-alert.dto';
 
 type GithubContext = typeof context;
+const enum AlertType {
+    CodeQL = 'CodeQL',
+    Dependabot = 'Dependabot',
+}
 
 async function run(): Promise<void> {
     try {
@@ -27,7 +32,13 @@ async function run(): Promise<void> {
             }
 
             const webhook = new IncomingWebhook(hook);
-            await notifyCodeQlAlerts(alerts, webhook);
+            const alertsType = core.getInput('alert_type');
+
+            if (alertsType === AlertType.Dependabot) {
+                await notifyDependabotAlerts(alerts, webhook);
+            } else {
+                await notifyCodeQlAlerts(alerts, webhook);
+            }
         } else {
             const ghToken = core.getInput('bearer_token', { required: false });
             const onlyOnPush = core.getInput('only_on_push', { required: false }) === 'true';
@@ -121,6 +132,62 @@ async function notifyCodeQlAlerts(alerts: Array<any>, webhook: IncomingWebhook) 
 
     fs.writeFileSync(alertsCacheFile, JSON.stringify(notify_cache));
 }
+async function notifyDependabotAlerts(alerts: Array<DependabotAlertDto>, webhook: IncomingWebhook) {
+    const alertsCacheFile = core.getInput('alerts_cache_file', { required: false });
+    let notify_cache: { [key: string]: Object } = {};
+
+    if (fs.existsSync(alertsCacheFile)) {
+        notify_cache = JSON.parse(fs.readFileSync(alertsCacheFile).toString());
+    }
+
+    for (let alert of alerts) {
+        if (alert.state === 'open') {
+            if (!notify_cache[alert.number]) {
+                notify_cache[alert.number] = true;
+                await webhook.send(JSON.stringify({
+                    $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+                    type: 'AdaptiveCard',
+                    version: '1.2',
+                    body: [
+                        {
+                            type: 'TextBlock',
+                            text: 'New security issue found',
+                            weight: 'bolder',
+                            size: 'Large'
+                        },
+                        {
+                            type: 'FactSet',
+                            separator: true,
+                            facts: [
+                                {
+                                    title: 'Summary:',
+                                    value: alert.security_advisory.summary
+                                },
+                                {
+                                    title: 'Severity:',
+                                    value: alert.security_advisory.severity
+                                },
+                                {
+                                    title: 'Date submitted:',
+                                    value: alert.created_at
+                                }
+                            ]
+                        }
+                    ],
+                    actions: [
+                        {
+                            type: 'Action.OpenUrl',
+                            title: 'View in GitHub',
+                            url: alert.html_url
+                        }
+                    ]
+                }));
+            }
+        }
+    }
+
+    fs.writeFileSync(alertsCacheFile, JSON.stringify(notify_cache));
+}
 
 async function notifyFailedWorkflow(runInfo: any, webhook: IncomingWebhook) {
     const { repo, workflow }: GithubContext = context;
@@ -128,25 +195,25 @@ async function notifyFailedWorkflow(runInfo: any, webhook: IncomingWebhook) {
     await webhook.send(JSON.stringify({
         '@context': 'https://schema.org/extensions',
         '@type': 'MessageCard',
-        'text': 'Run failed',
+        text: 'Run failed',
         'sections': [
             {
                 'facts': [
                     {
                         'name': 'Repository',
-                        'value': `[${repo.owner}/${repo.repo}](https://github.com/${repo.owner}/${repo.repo})`
+                        value: `[${repo.owner}/${repo.repo}](https://github.com/${repo.owner}/${repo.repo})`
                     },
                     {
                         'name': 'Workflow',
-                        'value': workflow
+                        value: workflow
                     },
                     {
                         'name': 'Committer',
-                        'value': runInfo.head_commit.author.name
+                        value: runInfo.head_commit.author.name
                     },
                     {
                         'name': 'Commit',
-                        'value': `[${runInfo.head_commit.message}](https://github.com/${repo.owner}/${repo.repo}/commit/${runInfo.head_commit.id})`
+                        value: `[${runInfo.head_commit.message}](https://github.com/${repo.owner}/${repo.repo}/commit/${runInfo.head_commit.id})`
                     }
                 ]
             }
