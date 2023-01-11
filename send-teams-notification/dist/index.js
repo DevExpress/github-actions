@@ -7556,7 +7556,7 @@ exports.isPlainObject = isPlainObject;
 
 /***/ }),
 
-/***/ 2142:
+/***/ 7352:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -7567,19 +7567,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IncomingWebhook = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(8577));
-/**
- * A client for Slack's Incoming Webhooks
- */
 class IncomingWebhook {
     constructor(url) {
         if (url === undefined) {
-            throw new Error('Incoming webhook URL is required');
+            throw new Error("Incoming webhook URL is required");
         }
         this.url = url;
         this.axios = axios_1.default.create({
             baseURL: url,
             maxRedirects: 0,
-            proxy: false
+            proxy: false,
         });
     }
     /**
@@ -7611,7 +7608,7 @@ exports.IncomingWebhook = IncomingWebhook;
 
 /***/ }),
 
-/***/ 2945:
+/***/ 9128:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -7619,7 +7616,7 @@ exports.IncomingWebhook = IncomingWebhook;
 /// <reference lib="es2017" />
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IncomingWebhook = void 0;
-var IncommingWebhook_1 = __nccwpck_require__(2142);
+var IncommingWebhook_1 = __nccwpck_require__(7352);
 Object.defineProperty(exports, "IncomingWebhook", ({ enumerable: true, get: function () { return IncommingWebhook_1.IncomingWebhook; } }));
 //# sourceMappingURL=index.js.map
 
@@ -12577,7 +12574,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(5316));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const github_1 = __nccwpck_require__(2189);
-const ms_teams_webhook_1 = __nccwpck_require__(2945);
+const ms_teams_webhook_1 = __nccwpck_require__(9128);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -12651,7 +12648,7 @@ function notifyCodeQlAlerts(alerts, webhook) {
             if (alert.state === 'open') {
                 if (!notify_cache[alert.number]) {
                     notify_cache[alert.number] = true;
-                    yield webhook.send(JSON.stringify({
+                    yield webhook.send({
                         '@type': 'MessageCard',
                         '@context': 'https://schema.org/extensions',
                         'summary': 'New security alert found',
@@ -12689,7 +12686,7 @@ function notifyCodeQlAlerts(alerts, webhook) {
                                 ]
                             }
                         ]
-                    }));
+                    });
                 }
             }
         }
@@ -12707,7 +12704,7 @@ function notifyDependabotAlerts(alerts, webhook) {
             if (alert.state === 'open') {
                 if (!notify_cache[alert.number]) {
                     notify_cache[alert.number] = true;
-                    yield webhook.send(JSON.stringify({
+                    yield webhook.send({
                         $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
                         type: 'AdaptiveCard',
                         version: '1.2',
@@ -12744,7 +12741,7 @@ function notifyDependabotAlerts(alerts, webhook) {
                                 url: alert.html_url
                             }
                         ]
-                    }));
+                    });
                 }
             }
         }
@@ -12754,7 +12751,7 @@ function notifyDependabotAlerts(alerts, webhook) {
 function notifyFailedWorkflow(runInfo, webhook) {
     return __awaiter(this, void 0, void 0, function* () {
         const { repo, workflow } = github_1.context;
-        yield webhook.send(JSON.stringify({
+        yield webhook.send({
             '@context': 'https://schema.org/extensions',
             '@type': 'MessageCard',
             'text': 'Run failed',
@@ -12792,7 +12789,7 @@ function notifyFailedWorkflow(runInfo, webhook) {
                     ]
                 }
             ]
-        }));
+        });
     });
 }
 run();

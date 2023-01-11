@@ -16,7 +16,7 @@
   "dependencies": {
     "@actions/core": "^1.9.1",
     "@actions/github": "^5.1.0",
-    "ms-teams-webhook": "^1.0.4"
+    "ms-teams-webhook": "^2.0.1"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",

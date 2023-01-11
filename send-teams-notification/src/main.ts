@@ -87,7 +87,7 @@ async function notifyCodeQlAlerts(alerts: Array<any>, webhook: IncomingWebhook) 
         if (alert.state === 'open') {
             if (!notify_cache[alert.number]) {
                 notify_cache[alert.number] = true;
-                await webhook.send(JSON.stringify({
+                await webhook.send({
                     '@type': 'MessageCard',
                     '@context': 'https://schema.org/extensions',
                     'summary': 'New security alert found',
@@ -125,7 +125,7 @@ async function notifyCodeQlAlerts(alerts: Array<any>, webhook: IncomingWebhook) 
                             ]
                         }
                     ]
-                }));
+                });
             }
         }
     }
@@ -144,7 +144,7 @@ async function notifyDependabotAlerts(alerts: Array<DependabotAlertDto>, webhook
         if (alert.state === 'open') {
             if (!notify_cache[alert.number]) {
                 notify_cache[alert.number] = true;
-                await webhook.send(JSON.stringify({
+                await webhook.send({
                     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
                     type: 'AdaptiveCard',
                     version: '1.2',
@@ -181,7 +181,7 @@ async function notifyDependabotAlerts(alerts: Array<DependabotAlertDto>, webhook
                             url: alert.html_url
                         }
                     ]
-                }));
+                });
             }
         }
     }
@@ -192,7 +192,7 @@ async function notifyDependabotAlerts(alerts: Array<DependabotAlertDto>, webhook
 async function notifyFailedWorkflow(runInfo: any, webhook: IncomingWebhook) {
     const { repo, workflow }: GithubContext = context;
 
-    await webhook.send(JSON.stringify({
+    await webhook.send({
         '@context': 'https://schema.org/extensions',
         '@type': 'MessageCard',
         'text': 'Run failed',
@@ -230,7 +230,7 @@ async function notifyFailedWorkflow(runInfo: any, webhook: IncomingWebhook) {
                 ]
             }
         ]
-    }));
+    });
 }
 
 run()
