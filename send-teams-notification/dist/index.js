@@ -12705,40 +12705,49 @@ function notifyDependabotAlerts(alerts, webhook) {
                 if (!notify_cache[alert.number]) {
                     notify_cache[alert.number] = true;
                     yield webhook.send({
-                        $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-                        type: 'AdaptiveCard',
-                        version: '1.2',
-                        body: [
+                        type: 'message',
+                        attachments: [
                             {
-                                type: 'TextBlock',
-                                text: 'New security issue found',
-                                weight: 'bolder',
-                                size: 'Large'
-                            },
-                            {
-                                type: 'FactSet',
-                                separator: true,
-                                facts: [
-                                    {
-                                        title: 'Summary:',
-                                        value: alert.security_advisory.summary
-                                    },
-                                    {
-                                        title: 'Severity:',
-                                        value: alert.security_advisory.severity
-                                    },
-                                    {
-                                        title: 'Date submitted:',
-                                        value: alert.created_at
-                                    }
-                                ]
-                            }
-                        ],
-                        actions: [
-                            {
-                                type: 'Action.OpenUrl',
-                                title: 'View in GitHub',
-                                url: alert.html_url
+                                contentType: 'application/vnd.microsoft.card.adaptive',
+                                contentUrl: alert.html_url,
+                                content: {
+                                    $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+                                    type: 'AdaptiveCard',
+                                    version: '1.2',
+                                    body: [
+                                        {
+                                            type: 'TextBlock',
+                                            text: 'New security issue found',
+                                            weight: 'bolder',
+                                            size: 'Large'
+                                        },
+                                        {
+                                            type: 'FactSet',
+                                            separator: true,
+                                            facts: [
+                                                {
+                                                    title: 'Summary:',
+                                                    value: alert.security_advisory.summary
+                                                },
+                                                {
+                                                    title: 'Severity:',
+                                                    value: alert.security_advisory.severity
+                                                },
+                                                {
+                                                    title: 'Date submitted:',
+                                                    value: alert.created_at
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    actions: [
+                                        {
+                                            type: 'Action.OpenUrl',
+                                            title: 'View in GitHub',
+                                            url: alert.html_url
+                                        }
+                                    ]
+                                }
                             }
                         ]
                     });
