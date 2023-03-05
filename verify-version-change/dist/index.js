@@ -13967,6 +13967,13 @@ const github_1 = __nccwpck_require__(2189);
 const exec_1 = __nccwpck_require__(110);
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const semver_1 = __importDefault(__nccwpck_require__(931));
+const execCommand = (command) => __awaiter(void 0, void 0, void 0, function* () {
+    const { stdout, stderr, exitCode } = yield (0, exec_1.getExecOutput)(command);
+    if (exitCode !== 0) {
+        throw new Error(`Command "${command}" has been failed with error: ${stderr}`);
+    }
+    return stdout.trim();
+});
 function run() {
     var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
@@ -13977,7 +13984,11 @@ function run() {
             let head;
             switch (eventName) {
                 case 'pull_request':
-                    base = (_b = (_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.sha;
+                    const baseBranch = (_b = (_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.ref;
+                    core.info(`Base branch: ${baseBranch}`);
+                    core.info(`ref: ${github_1.context.ref}`);
+                    yield execCommand(`git fetch origin`);
+                    base = yield execCommand(`git rev-parse origin/${baseBranch}`);
                     head = (_d = (_c = github_1.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.head) === null || _d === void 0 ? void 0 : _d.sha;
                     break;
                 case 'push':
@@ -13993,12 +14004,9 @@ function run() {
             core.info(`Base commit: ${base}`);
             core.info(`Head commit: ${head}`);
             // https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---word-diffltmodegt
-            const { stdout, stderr, exitCode } = yield (0, exec_1.getExecOutput)(`git diff --word-diff ${base} ${head} ${packageJsonPath}`);
-            if (exitCode !== 0) {
-                throw new Error(`"git diff" has been failed with error: ${stderr}`);
-            }
+            const diff = yield execCommand(`git diff --word-diff ${base} ${head} ${packageJsonPath}`);
             const versionRegExp = new RegExp(/"version": \[-"(.*)",-]{\+"(.*)",\+}/);
-            const regExpResult = stdout.match(versionRegExp);
+            const regExpResult = diff.match(versionRegExp);
             if (regExpResult != null) {
                 const [_, oldVersion, newVersion] = regExpResult;
                 if (semver_1.default.valid(oldVersion) == null) {

@@ -5,6 +5,16 @@ import { getExecOutput } from '@actions/exec'
 import path from 'path'
 import semver from 'semver'
 
+const execCommand = async (command: string): Promise<string> => {
+    const { stdout, stderr, exitCode } = await getExecOutput(command)
+
+    if (exitCode !== 0) {
+        throw new Error(`Command "${command}" has been failed with error: ${stderr}`)
+    }
+
+    return stdout.trim()
+}
+
 async function run(): Promise<void> {
     try {
         const packageJsonPath = path.join(core.getInput('path'), 'package.json')
@@ -16,7 +26,10 @@ async function run(): Promise<void> {
 
         switch (eventName) {
             case 'pull_request':
-                base = context.payload.pull_request?.base?.sha
+                const baseBranch = context.payload.pull_request?.base?.ref
+                await execCommand(`git fetch origin`)
+
+                base = await execCommand(`git rev-parse origin/${baseBranch}`)
                 head = context.payload.pull_request?.head?.sha
                 break
             case 'push':
@@ -35,14 +48,10 @@ async function run(): Promise<void> {
         core.info(`Head commit: ${head}`)
 
         // https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---word-diffltmodegt
-        const { stdout, stderr, exitCode } = await getExecOutput(`git diff --word-diff ${base} ${head} ${packageJsonPath}`)
-
-        if (exitCode !== 0) {
-            throw new Error(`"git diff" has been failed with error: ${stderr}`)
-        }
+        const diff = await execCommand(`git diff --word-diff ${base} ${head} ${packageJsonPath}`)
 
         const versionRegExp = new RegExp(/"version": \[-"(.*)",-]{\+"(.*)",\+}/)
-        const regExpResult = stdout.match(versionRegExp)
+        const regExpResult = diff.match(versionRegExp)
 
         if (regExpResult != null) {
             const [ _, oldVersion, newVersion ] = regExpResult
