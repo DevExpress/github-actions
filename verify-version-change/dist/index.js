@@ -13985,8 +13985,6 @@ function run() {
             switch (eventName) {
                 case 'pull_request':
                     const baseBranch = (_b = (_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.ref;
-                    core.info(`Base branch: ${baseBranch}`);
-                    core.info(`ref: ${github_1.context.ref}`);
                     yield execCommand(`git fetch origin`);
                     base = yield execCommand(`git rev-parse origin/${baseBranch}`);
                     head = (_d = (_c = github_1.context.payload.pull_request) === null || _c === void 0 ? void 0 : _c.head) === null || _d === void 0 ? void 0 : _d.sha;
