@@ -1,7 +1,7 @@
-/node_modules/
+**/node_modules/
 
 .idea/
-.vscode
+.vscode/
 
 logs
 *.log
@@ -14,4 +14,4 @@ yarn-error.log*
 *.tgz
 .env
 
-lib/**/*
+*/lib/
