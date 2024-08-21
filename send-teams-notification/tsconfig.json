@@ -1,13 +1,8 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES6",
-    "module": "CommonJS",
     "outDir": "./lib",
     "rootDir": "./src",
-    "strict": true,
-    "noImplicitAny": true,
-    "esModuleInterop": true,
     "strictPropertyInitialization": false
-  },
-  "exclude": ["node_modules"]
+  }
 }
