@@ -6,7 +6,7 @@
   "author": "Developer Express Inc.",
   "license": "MIT",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   },
   "homepage": "https://github.com/DevExpress/github-actions#readme",
   "bugs": {
