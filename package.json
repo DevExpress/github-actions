@@ -22,12 +22,17 @@
     "build",
     "package"
   ],
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^5.1.1"
+  },
   "devDependencies": {
-    "@types/node": "^16.11.7",
-    "@types/semver": "^7.3.12",
-    "@vercel/ncc": "^0.34.0",
+    "@types/node": "^16.18.105",
+    "@types/semver": "^7.5.8",
+    "@vercel/ncc": "^0.38.1",
     "rimraf": "^3.0.2",
-    "typescript": "^4.8.4"
+    "typescript": "^4.9.5"
   },
   "workspaces": [
     "send-teams-notification",
