@@ -13,7 +13,7 @@
     "build": "tsc",
     "package": "ncc build"
   },
-  "dependencies": {
+  "devDependencies": {
     "ms-teams-webhook": "~2.0.1"
   }
 }
