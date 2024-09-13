@@ -9,8 +9,7 @@
   "main": "lib/index.js",
   "scripts": {
     "clean": "rimraf lib",
-    "build": "tsc",
-    "test": "jest --config ../jest.config.js"
+    "build": "tsc"
   },
   "devDependencies": {
     "minimatch": "^10.0.1"
