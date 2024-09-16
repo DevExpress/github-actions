@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import { MinimatchOptions, minimatch } from "minimatch";
 
 const NEGATION = '!';
@@ -10,6 +11,16 @@ function match(path: string, pattern: string): boolean {
 }
 
 export function filterPaths(
+    paths: string[],
+    patterns: string[],
+): string[] {
+    core.debug('patterns: ' + JSON.stringify(patterns, undefined, 2));
+    const filteredPaths = filterPathsImpl(paths, patterns);
+    core.info(`${filteredPaths.length} filtered paths: ${JSON.stringify(filteredPaths, undefined, 2)}`);
+    return filteredPaths;
+}
+
+function filterPathsImpl(
     paths: string[],
     patterns: string[],
 ): string[] {

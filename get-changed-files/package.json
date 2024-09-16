@@ -1,0 +1,16 @@
+{
+  "name": "get-changed-files",
+  "description": "GitHub action that finds all files changed in the PR",
+  "version": "0.1.0",
+  "author": "Developer Express Inc.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "main": "lib/main.js",
+  "scripts": {
+    "clean": "rimraf dist lib",
+    "build": "tsc",
+    "package": "ncc build"
+  }
+}

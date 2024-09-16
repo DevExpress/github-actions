@@ -39,6 +39,7 @@
   },
   "workspaces": [
     "common",
+    "get-changed-files",
     "pr-filter",
     "send-teams-notification",
     "verify-version-change"
