@@ -527,7 +527,7 @@ function run() {
             const changedFiles = yield (0, common_1.getChangedFiles)(token);
             const filteredFiles = (0, common_1.filterPaths)(changedFiles, pathPatterns);
             (0, common_1.ensureDir)(output);
-            fs.writeFileSync(output, filteredFiles.join('\n'));
+            fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
         }
         catch (error) {
             if (error instanceof Error) {

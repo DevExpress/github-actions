@@ -16,7 +16,7 @@ async function run(): Promise<void> {
         const filteredFiles = filterPaths(changedFiles, pathPatterns);
 
         ensureDir(output);
-        fs.writeFileSync(output, filteredFiles.join('\n'));
+        fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
     } catch (error) {
         if (error instanceof Error) {
             core.setFailed(error.message)
