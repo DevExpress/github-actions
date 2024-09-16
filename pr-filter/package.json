@@ -1,7 +1,7 @@
 {
   "name": "pr-filter",
   "description": "GitHub action that checks if PR meets certain criteria",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "Developer Express Inc.",
   "license": "MIT",
   "engines": {
