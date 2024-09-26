@@ -22,4 +22,4 @@ runs:
 
 outputs:
   result:
-    description: true if all criteria met, otherwise false
+    description: A file with the list of files in JSON format
