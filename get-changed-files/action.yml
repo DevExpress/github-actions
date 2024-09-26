@@ -1,5 +1,5 @@
 name: get-changed-files
-description: Filters list of files changed in a PR with path globs and saves the list to file
+description: Filters the list of files changed in a PR with path globs and saves the list to file
 
 inputs:
 
