@@ -1,5 +1,5 @@
-name: pr-filter
-description: Checks if PR meets certian criteria
+name: get-changed-files
+description: Filters list of files changed in a PR with path globs and saves the list to file
 
 inputs:
 
