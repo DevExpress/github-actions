@@ -11,6 +11,11 @@ describe('path utils', () => {
             },
             {
                 paths: ['a.ts', 'a.js', 'b.md'],
+                patterns: [],
+                expected: ['a.ts', 'a.js', 'b.md']
+            },
+            {
+                paths: ['a.ts', 'a.js', 'b.md'],
                 patterns: ['b*.*'],
                 expected: ['b.md']
             },
