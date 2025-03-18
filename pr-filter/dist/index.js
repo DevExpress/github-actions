@@ -16,8 +16,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.execCommand = void 0;
+exports.setOutputs = exports.execCommand = void 0;
+const core_1 = __nccwpck_require__(5316);
 const exec_1 = __nccwpck_require__(110);
+const serialization_utils_1 = __nccwpck_require__(9091);
 function execCommand(command) {
     return __awaiter(this, void 0, void 0, function* () {
         const { stdout, stderr, exitCode } = yield (0, exec_1.getExecOutput)(command);
@@ -28,6 +30,13 @@ function execCommand(command) {
     });
 }
 exports.execCommand = execCommand;
+function setOutputs(values) {
+    (0, core_1.setOutput)('json', JSON.stringify(values));
+    for (const [key, value] of Object.entries(values)) {
+        (0, core_1.setOutput)(key, (0, serialization_utils_1.stringifyForShell)(value));
+    }
+}
+exports.setOutputs = setOutputs;
 
 
 /***/ }),
@@ -264,6 +273,44 @@ function getChangedFilesImpl(token) {
         }
     });
 }
+
+
+/***/ }),
+
+/***/ 9091:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.stringifyForShell = void 0;
+function stringifyArrayItem(item) {
+    switch (typeof item) {
+        case 'number':
+            return item.toString();
+        case 'string':
+            return `'${item}'`;
+        default:
+            return JSON.stringify(item);
+    }
+}
+function stringifyForShell(value) {
+    switch (typeof value) {
+        case 'string':
+            return value;
+        case 'object':
+            if (Array.isArray(value)) {
+                return value.map(stringifyArrayItem).join(' ');
+            }
+            if (value === null) {
+                return '';
+            }
+            return value.toString();
+        default:
+            return JSON.stringify(value);
+    }
+}
+exports.stringifyForShell = stringifyForShell;
 
 
 /***/ }),

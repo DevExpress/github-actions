@@ -1,7 +1,13 @@
 import * as fs from 'fs';
 import * as core from '@actions/core';
 
-import { inputs, filterPaths, getChangedFiles, ensureDir } from 'common';
+import {
+    inputs,
+    filterPaths,
+    getChangedFiles,
+    ensureDir,
+    setOutputs,
+} from 'common';
 
 
 async function run(): Promise<void> {
@@ -18,12 +24,10 @@ async function run(): Promise<void> {
         ensureDir(output);
         fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
 
-        core.setOutput('files', JSON.stringify(filteredFiles));
-        core.setOutput('json', JSON.stringify({
+        setOutputs({
             files: filteredFiles,
             count: filteredFiles.length,
-        }));
-        core.setOutput('count', filteredFiles.length.toString().trim());
+        });
     } catch (error) {
         if (error instanceof Error) {
             core.setFailed(error.message)
