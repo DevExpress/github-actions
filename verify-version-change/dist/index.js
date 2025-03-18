@@ -144,13 +144,15 @@ function filterPaths(paths, patterns) {
 }
 exports.filterPaths = filterPaths;
 function filterPathsImpl(paths, patterns) {
-    return paths.filter(path => {
-        return patterns.reduce((prevResult, pattern) => {
-            return pattern.startsWith(NEGATION)
-                ? prevResult && !match(path, pattern.substring(1))
-                : prevResult || match(path, pattern);
-        }, false);
-    });
+    return (patterns === null || patterns === void 0 ? void 0 : patterns.length) === 0
+        ? paths
+        : paths.filter(path => {
+            return patterns.reduce((prevResult, pattern) => {
+                return pattern.startsWith(NEGATION)
+                    ? prevResult && !match(path, pattern.substring(1))
+                    : prevResult || match(path, pattern);
+            }, false);
+        });
 }
 
 
