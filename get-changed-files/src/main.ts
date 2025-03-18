@@ -17,6 +17,9 @@ async function run(): Promise<void> {
 
         ensureDir(output);
         fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
+
+        core.setOutput('files', filteredFiles.toString().trim());
+        core.setOutput('count', filteredFiles.length.toString().trim());
     } catch (error) {
         if (error instanceof Error) {
             core.setFailed(error.message)
