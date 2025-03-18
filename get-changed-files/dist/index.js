@@ -530,7 +530,11 @@ function run() {
             const filteredFiles = (0, common_1.filterPaths)(changedFiles, pathPatterns);
             (0, common_1.ensureDir)(output);
             fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
-            core.setOutput('files', filteredFiles.toString().trim());
+            core.setOutput('files', JSON.stringify(filteredFiles));
+            core.setOutput('json', JSON.stringify({
+                files: filteredFiles,
+                count: filteredFiles.length,
+            }));
             core.setOutput('count', filteredFiles.length.toString().trim());
         }
         catch (error) {
