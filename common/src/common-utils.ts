@@ -13,9 +13,6 @@ export async function execCommand(command: string): Promise<string> {
 }
 
 export function setOutputs(values: Record<string, unknown>): void {
-
-  setOutput('json', JSON.stringify(values));
-
   for (const [key, value] of Object.entries(values)) {
     setOutput(key, stringifyForShell(value));
   }

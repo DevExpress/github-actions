@@ -3,10 +3,10 @@ import * as core from '@actions/core';
 
 import {
     inputs,
-    filterPaths,
     getChangedFiles,
     ensureDir,
     setOutputs,
+    testPath,
 } from 'common';
 
 
@@ -19,13 +19,16 @@ async function run(): Promise<void> {
         console.log('patterns: ' + JSON.stringify(pathPatterns, undefined, 2));
 
         const changedFiles = await getChangedFiles(token);
-        const filteredFiles = filterPaths(changedFiles, pathPatterns);
+        const filteredFiles = pathPatterns.length > 0
+            ? changedFiles.filter(({ filename }) => testPath(filename, pathPatterns))
+            : changedFiles;
 
         ensureDir(output);
-        fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
+        fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ filename }) => ({ filename })), undefined, 2));
 
         setOutputs({
-            files: filteredFiles,
+            json: JSON.stringify(filteredFiles, undefined, 2),
+            files: filteredFiles.map(e => e.filename),
             count: filteredFiles.length,
         });
     } catch (error) {

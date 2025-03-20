@@ -31,7 +31,6 @@ function execCommand(command) {
 }
 exports.execCommand = execCommand;
 function setOutputs(values) {
-    (0, core_1.setOutput)('json', JSON.stringify(values));
     for (const [key, value] of Object.entries(values)) {
         (0, core_1.setOutput)(key, (0, serialization_utils_1.stringifyForShell)(value));
     }
@@ -135,7 +134,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.filterPaths = void 0;
+exports.testPath = exports.filterPaths = void 0;
 const core = __importStar(__nccwpck_require__(5316));
 const minimatch_1 = __nccwpck_require__(148);
 const NEGATION = '!';
@@ -155,14 +154,16 @@ exports.filterPaths = filterPaths;
 function filterPathsImpl(paths, patterns) {
     return (patterns === null || patterns === void 0 ? void 0 : patterns.length) === 0
         ? paths
-        : paths.filter(path => {
-            return patterns.reduce((prevResult, pattern) => {
-                return pattern.startsWith(NEGATION)
-                    ? prevResult && !match(path, pattern.substring(1))
-                    : prevResult || match(path, pattern);
-            }, false);
-        });
+        : paths.filter(path => testPath(path, patterns));
 }
+function testPath(path, patterns) {
+    return patterns.reduce((prevResult, pattern) => {
+        return pattern.startsWith(NEGATION)
+            ? prevResult && !match(path, pattern.substring(1))
+            : prevResult || match(path, pattern);
+    }, false);
+}
+exports.testPath = testPath;
 
 
 /***/ }),
@@ -260,12 +261,12 @@ function getChangedFilesImpl(token) {
                 core.setFailed('Getting changed files only works on pull request events.');
                 return [];
             }
-            const files = yield octokit.paginate(octokit.rest.pulls.listFiles, {
+            const entries = yield octokit.paginate(octokit.rest.pulls.listFiles, {
                 owner: github_1.context.repo.owner,
                 repo: github_1.context.repo.repo,
                 pull_number: github_1.context.payload.pull_request.number,
             });
-            return files.map(file => file.filename);
+            return entries.map(({ filename, status }) => ({ filename, status }));
         }
         catch (error) {
             core.setFailed(`Getting changed files failed with error: ${error}`);

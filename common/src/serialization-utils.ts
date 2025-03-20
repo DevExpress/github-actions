@@ -18,7 +18,6 @@ export function stringifyForShell(value: unknown): string {
     case 'string':
       return value;
 
-
     case 'object':
       if (Array.isArray(value)) {
         return value.map(stringifyArrayItem).join(' ');
