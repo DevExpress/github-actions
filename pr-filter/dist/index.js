@@ -266,7 +266,7 @@ function getChangedFilesImpl(token) {
                 repo: github_1.context.repo.repo,
                 pull_number: github_1.context.payload.pull_request.number,
             });
-            return entries.map(({ filename, status }) => ({ filename, status }));
+            return entries.map(({ filename, status }) => ({ path: filename, status }));
         }
         catch (error) {
             core.setFailed(`Getting changed files failed with error: ${error}`);
@@ -33709,7 +33709,7 @@ function run() {
         try {
             const pathPatterns = core.getInput(common_1.inputs.PATHS).split(';');
             const token = core.getInput(common_1.inputs.GH_TOKEN, { required: true });
-            const changedFiles = (yield (0, common_1.getChangedFiles)(token)).map(e => e.filename);
+            const changedFiles = (yield (0, common_1.getChangedFiles)(token)).map(e => e.path);
             const filteredFiles = (0, common_1.filterPaths)(changedFiles, pathPatterns);
             core.setOutput(common_1.outputs.RESULT, filteredFiles.length > 0);
         }

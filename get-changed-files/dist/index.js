@@ -266,7 +266,7 @@ function getChangedFilesImpl(token) {
                 repo: github_1.context.repo.repo,
                 pull_number: github_1.context.payload.pull_request.number,
             });
-            return entries.map(({ filename, status }) => ({ filename, status }));
+            return entries.map(({ filename, status }) => ({ path: filename, status }));
         }
         catch (error) {
             core.setFailed(`Getting changed files failed with error: ${error}`);
@@ -576,13 +576,16 @@ function run() {
             console.log('patterns: ' + JSON.stringify(pathPatterns, undefined, 2));
             const changedFiles = yield (0, common_1.getChangedFiles)(token);
             const filteredFiles = pathPatterns.length > 0
-                ? changedFiles.filter(({ filename }) => (0, common_1.testPath)(filename, pathPatterns))
+                ? changedFiles.filter(({ path }) => (0, common_1.testPath)(path, pathPatterns))
                 : changedFiles;
             (0, common_1.ensureDir)(output);
-            fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ filename }) => ({ filename })), undefined, 2));
+            fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ path }) => ({ filename: path })), undefined, 2));
             (0, common_1.setOutputs)({
-                json: JSON.stringify(filteredFiles, undefined, 2),
-                files: filteredFiles.map(e => e.filename),
+                json: {
+                    files: JSON.stringify(filteredFiles, undefined, 2),
+                    count: filteredFiles.length,
+                },
+                files: filteredFiles.map(e => e.path),
                 count: filteredFiles.length,
             });
         }

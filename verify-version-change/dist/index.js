@@ -266,7 +266,7 @@ function getChangedFilesImpl(token) {
                 repo: github_1.context.repo.repo,
                 pull_number: github_1.context.payload.pull_request.number,
             });
-            return entries.map(({ filename, status }) => ({ filename, status }));
+            return entries.map(({ filename, status }) => ({ path: filename, status }));
         }
         catch (error) {
             core.setFailed(`Getting changed files failed with error: ${error}`);

@@ -44,7 +44,7 @@ function normalizeCommit(commit: string) {
 }
 
 interface ChangedFile {
-    filename: string;
+    path: string;
     status: components['schemas']['diff-entry']['status'];
 }
 
@@ -70,7 +70,7 @@ async function getChangedFilesImpl(token: string): Promise<ChangedFile[]> {
             pull_number: context.payload.pull_request.number,
         });
 
-        return entries.map(({ filename, status }) => ({ filename, status }));
+        return entries.map(({ filename, status }) => ({ path: filename, status }));
     } catch (error) {
         core.setFailed(`Getting changed files failed with error: ${error}`);
         return [];

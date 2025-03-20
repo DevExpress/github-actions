@@ -7,7 +7,7 @@ async function run(): Promise<void> {
         const pathPatterns = core.getInput(inputs.PATHS).split(';');
         const token = core.getInput(inputs.GH_TOKEN, { required: true });
 
-        const changedFiles = (await getChangedFiles(token)).map(e => e.filename);
+        const changedFiles = (await getChangedFiles(token)).map(e => e.path);
         const filteredFiles = filterPaths(changedFiles, pathPatterns);
 
         core.setOutput(outputs.RESULT, filteredFiles.length > 0);

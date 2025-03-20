@@ -20,15 +20,18 @@ async function run(): Promise<void> {
 
         const changedFiles = await getChangedFiles(token);
         const filteredFiles = pathPatterns.length > 0
-            ? changedFiles.filter(({ filename }) => testPath(filename, pathPatterns))
+            ? changedFiles.filter(({ path }) => testPath(path, pathPatterns))
             : changedFiles;
 
         ensureDir(output);
-        fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ filename }) => ({ filename })), undefined, 2));
+        fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ path }) => ({ filename: path })), undefined, 2));
 
         setOutputs({
-            json: JSON.stringify(filteredFiles, undefined, 2),
-            files: filteredFiles.map(e => e.filename),
+            json: {
+                files: JSON.stringify(filteredFiles, undefined, 2),
+                count: filteredFiles.length,
+            },
+            files: filteredFiles.map(e => e.path),
             count: filteredFiles.length,
         });
     } catch (error) {
