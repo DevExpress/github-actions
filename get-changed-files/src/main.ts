@@ -27,10 +27,10 @@ async function run(): Promise<void> {
         fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ path }) => ({ filename: path })), undefined, 2));
 
         setOutputs({
-            json: {
-                files: JSON.stringify(filteredFiles, undefined, 2),
+            json: JSON.stringify({
+                files: filteredFiles,
                 count: filteredFiles.length,
-            },
+            }),
             files: filteredFiles.map(e => e.path),
             count: filteredFiles.length,
         });
