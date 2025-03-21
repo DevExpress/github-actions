@@ -1,6 +1,7 @@
 
-import * as core from '@actions/core'
-import { context, getOctokit } from '@actions/github'
+import * as core from '@actions/core';
+import { context, getOctokit } from '@actions/github';
+import { components } from '@octokit/openapi-types';
 import { execCommand } from './common-utils';
 
 export async function getPrRevisionRange(): Promise<{
@@ -42,14 +43,19 @@ function normalizeCommit(commit: string) {
     return commit === '0000000000000000000000000000000000000000' ? 'HEAD^' : commit;
 }
 
-export async function getChangedFiles(token: string): Promise<string[]> {
+interface ChangedFile {
+    path: string;
+    status: components['schemas']['diff-entry']['status'];
+}
+
+export async function getChangedFiles(token: string): Promise<ChangedFile[]> {
     return getChangedFilesImpl(token).then((files) => {
         core.info(`${files.length} changed files: ${JSON.stringify(files, undefined, 2)}`)
         return files;
     });
 }
 
-async function getChangedFilesImpl(token: string): Promise<string[]> {
+async function getChangedFilesImpl(token: string): Promise<ChangedFile[]> {
     try {
         const octokit = getOctokit(token);
 
@@ -58,13 +64,13 @@ async function getChangedFilesImpl(token: string): Promise<string[]> {
             return [];
         }
 
-        const files = await octokit.paginate(octokit.rest.pulls.listFiles, {
+        const entries = await octokit.paginate(octokit.rest.pulls.listFiles, {
             owner: context.repo.owner,
             repo: context.repo.repo,
             pull_number: context.payload.pull_request.number,
         });
 
-        return files.map(file => file.filename);
+        return entries.map(({ filename, status }) => ({ path: filename, status }));
     } catch (error) {
         core.setFailed(`Getting changed files failed with error: ${error}`);
         return [];

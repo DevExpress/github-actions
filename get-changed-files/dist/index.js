@@ -16,8 +16,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.execCommand = void 0;
+exports.setOutputs = exports.execCommand = void 0;
+const core_1 = __nccwpck_require__(5316);
 const exec_1 = __nccwpck_require__(110);
+const serialization_utils_1 = __nccwpck_require__(9091);
 function execCommand(command) {
     return __awaiter(this, void 0, void 0, function* () {
         const { stdout, stderr, exitCode } = yield (0, exec_1.getExecOutput)(command);
@@ -28,6 +30,12 @@ function execCommand(command) {
     });
 }
 exports.execCommand = execCommand;
+function setOutputs(values) {
+    for (const [key, value] of Object.entries(values)) {
+        (0, core_1.setOutput)(key, (0, serialization_utils_1.stringifyForShell)(value));
+    }
+}
+exports.setOutputs = setOutputs;
 
 
 /***/ }),
@@ -126,7 +134,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.filterPaths = void 0;
+exports.testPath = exports.filterPaths = void 0;
 const core = __importStar(__nccwpck_require__(5316));
 const minimatch_1 = __nccwpck_require__(148);
 const NEGATION = '!';
@@ -146,14 +154,16 @@ exports.filterPaths = filterPaths;
 function filterPathsImpl(paths, patterns) {
     return (patterns === null || patterns === void 0 ? void 0 : patterns.length) === 0
         ? paths
-        : paths.filter(path => {
-            return patterns.reduce((prevResult, pattern) => {
-                return pattern.startsWith(NEGATION)
-                    ? prevResult && !match(path, pattern.substring(1))
-                    : prevResult || match(path, pattern);
-            }, false);
-        });
+        : paths.filter(path => testPath(path, patterns));
 }
+function testPath(path, patterns) {
+    return patterns.reduce((prevResult, pattern) => {
+        return pattern.startsWith(NEGATION)
+            ? prevResult && !match(path, pattern.substring(1))
+            : prevResult || match(path, pattern);
+    }, false);
+}
+exports.testPath = testPath;
 
 
 /***/ }),
@@ -251,12 +261,12 @@ function getChangedFilesImpl(token) {
                 core.setFailed('Getting changed files only works on pull request events.');
                 return [];
             }
-            const files = yield octokit.paginate(octokit.rest.pulls.listFiles, {
+            const entries = yield octokit.paginate(octokit.rest.pulls.listFiles, {
                 owner: github_1.context.repo.owner,
                 repo: github_1.context.repo.repo,
                 pull_number: github_1.context.payload.pull_request.number,
             });
-            return files.map(file => file.filename);
+            return entries.map(({ filename, status }) => ({ path: filename, status }));
         }
         catch (error) {
             core.setFailed(`Getting changed files failed with error: ${error}`);
@@ -264,6 +274,44 @@ function getChangedFilesImpl(token) {
         }
     });
 }
+
+
+/***/ }),
+
+/***/ 9091:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.stringifyForShell = void 0;
+function stringifyArrayItem(item) {
+    switch (typeof item) {
+        case 'number':
+            return item.toString();
+        case 'string':
+            return `'${item}'`;
+        default:
+            return JSON.stringify(item);
+    }
+}
+function stringifyForShell(value) {
+    switch (typeof value) {
+        case 'string':
+            return value;
+        case 'object':
+            if (Array.isArray(value)) {
+                return value.map(stringifyArrayItem).join(' ');
+            }
+            if (value === null) {
+                return '';
+            }
+            return value.toString();
+        default:
+            return JSON.stringify(value);
+    }
+}
+exports.stringifyForShell = stringifyForShell;
 
 
 /***/ }),
@@ -527,9 +575,19 @@ function run() {
             const output = core.getInput(common_1.inputs.OUTPUT, { required: true });
             console.log('patterns: ' + JSON.stringify(pathPatterns, undefined, 2));
             const changedFiles = yield (0, common_1.getChangedFiles)(token);
-            const filteredFiles = (0, common_1.filterPaths)(changedFiles, pathPatterns);
+            const filteredFiles = pathPatterns.length > 0
+                ? changedFiles.filter(({ path }) => (0, common_1.testPath)(path, pathPatterns))
+                : changedFiles;
             (0, common_1.ensureDir)(output);
-            fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
+            fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ path }) => ({ filename: path })), undefined, 2));
+            (0, common_1.setOutputs)({
+                json: JSON.stringify({
+                    files: filteredFiles,
+                    count: filteredFiles.length,
+                }),
+                files: filteredFiles.map(e => e.path),
+                count: filteredFiles.length,
+            });
         }
         catch (error) {
             if (error instanceof Error) {

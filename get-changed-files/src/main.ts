@@ -1,7 +1,13 @@
 import * as fs from 'fs';
 import * as core from '@actions/core';
 
-import { inputs, filterPaths, getChangedFiles, ensureDir } from 'common';
+import {
+    inputs,
+    getChangedFiles,
+    ensureDir,
+    setOutputs,
+    testPath,
+} from 'common';
 
 
 async function run(): Promise<void> {
@@ -13,10 +19,21 @@ async function run(): Promise<void> {
         console.log('patterns: ' + JSON.stringify(pathPatterns, undefined, 2));
 
         const changedFiles = await getChangedFiles(token);
-        const filteredFiles = filterPaths(changedFiles, pathPatterns);
+        const filteredFiles = pathPatterns.length > 0
+            ? changedFiles.filter(({ path }) => testPath(path, pathPatterns))
+            : changedFiles;
 
         ensureDir(output);
-        fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
+        fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ path }) => ({ filename: path })), undefined, 2));
+
+        setOutputs({
+            json: JSON.stringify({
+                files: filteredFiles,
+                count: filteredFiles.length,
+            }),
+            files: filteredFiles.map(e => e.path),
+            count: filteredFiles.length,
+        });
     } catch (error) {
         if (error instanceof Error) {
             core.setFailed(error.message)

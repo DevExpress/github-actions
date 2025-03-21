@@ -21,5 +21,11 @@ runs:
   main: dist/index.js
 
 outputs:
-  result:
-    description: A file with the list of files in JSON format
+  count:
+    description: The count of all files changed in the PR
+  files:
+    description: Space-separated list of all files changed in the PR
+  json:
+    description: |
+      Full output in JSON format.
+      'Schema: { files: { path: string; status: string; } []; count: number; }'
