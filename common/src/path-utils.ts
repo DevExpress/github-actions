@@ -24,11 +24,15 @@ function filterPathsImpl(
     paths: string[],
     patterns: string[],
 ): string[] {
-    return paths.filter(path => {
-        return patterns.reduce((prevResult, pattern) => {
-            return pattern.startsWith(NEGATION)
-                ? prevResult && !match(path, pattern.substring(1))
-                : prevResult || match(path, pattern);
-        }, false);
-    });
+    return patterns?.length === 0
+        ? paths
+        : paths.filter(path => testPath(path, patterns));
+}
+
+export function testPath(path: string, patterns: string[]): boolean {
+    return patterns.reduce((prevResult, pattern) => {
+        return pattern.startsWith(NEGATION)
+            ? prevResult && !match(path, pattern.substring(1))
+            : prevResult || match(path, pattern);
+    }, false);
 }
