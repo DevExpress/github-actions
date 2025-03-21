@@ -1,4 +1,6 @@
+import { setOutput } from '@actions/core';
 import { getExecOutput } from '@actions/exec'
+import { stringifyForShell } from './serialization-utils';
 
 export async function execCommand(command: string): Promise<string> {
   const { stdout, stderr, exitCode } = await getExecOutput(command)
@@ -8,4 +10,10 @@ export async function execCommand(command: string): Promise<string> {
   }
 
   return stdout.trim()
+}
+
+export function setOutputs(values: Record<string, unknown>): void {
+  for (const [key, value] of Object.entries(values)) {
+    setOutput(key, stringifyForShell(value));
+  }
 }
