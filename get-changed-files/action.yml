@@ -11,11 +11,6 @@ inputs:
     description: Semicolon separated globs
     required: false
 
-  output:
-    description: Output file path
-    required: true
-
-
 runs:
   using: node16
   main: dist/index.js

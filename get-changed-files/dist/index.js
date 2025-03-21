@@ -49,7 +49,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.outputs = exports.inputs = void 0;
 exports.inputs = {
     GH_TOKEN: 'gh-token',
-    OUTPUT: 'output',
     PATHS: 'paths',
 };
 exports.outputs = {
@@ -572,7 +571,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const fs = __importStar(__nccwpck_require__(7147));
 const core = __importStar(__nccwpck_require__(5316));
 const common_1 = __nccwpck_require__(9145);
 function run() {
@@ -580,14 +578,11 @@ function run() {
         try {
             const patterns = (0, common_1.normalizePatterns)(core.getInput(common_1.inputs.PATHS).split(';'));
             const token = core.getInput(common_1.inputs.GH_TOKEN, { required: true });
-            const output = core.getInput(common_1.inputs.OUTPUT, { required: true });
             console.log('patterns: ' + JSON.stringify(patterns, undefined, 2));
             const changedFiles = yield (0, common_1.getChangedFiles)(token);
             const filteredFiles = patterns === undefined
                 ? changedFiles
                 : changedFiles.filter(({ path }) => (0, common_1.testPath)(path, patterns));
-            (0, common_1.ensureDir)(output);
-            fs.writeFileSync(output, JSON.stringify(filteredFiles.map(({ path }) => ({ filename: path })), undefined, 2));
             (0, common_1.setOutputs)({
                 json: JSON.stringify({
                     files: filteredFiles,
