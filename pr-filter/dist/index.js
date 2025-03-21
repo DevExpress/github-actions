@@ -49,7 +49,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.outputs = exports.inputs = void 0;
 exports.inputs = {
     GH_TOKEN: 'gh-token',
-    OUTPUT: 'output',
     PATHS: 'paths',
 };
 exports.outputs = {
