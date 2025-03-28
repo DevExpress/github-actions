@@ -1,4 +1,4 @@
-import { filterPaths } from "./path-utils";
+import { filterPaths, normalizePatterns } from "./path-utils";
 
 describe('path utils', () => {
 
@@ -8,6 +8,11 @@ describe('path utils', () => {
                 paths: [],
                 patterns: [],
                 expected: []
+            },
+            {
+                paths: ['a.ts', 'a.js', 'b.md'],
+                patterns: [],
+                expected: ['a.ts', 'a.js', 'b.md']
             },
             {
                 paths: ['a.ts', 'a.js', 'b.md'],
@@ -87,6 +92,20 @@ describe('path utils', () => {
             },
         ])('specific cases [%#]', ({ paths, patterns, expected }) => {
             expect(filterPaths(paths, patterns)).toEqual(expected);
+        });
+    });
+
+    describe('normalizePatterns', () => {
+        test.each([
+            { patterns: undefined, expected: undefined },
+            { patterns: [ ], expected: undefined },
+            { patterns: [ undefined ], expected: undefined },
+            { patterns: [ '' ], expected: undefined },
+            { patterns: [ '', undefined ], expected: undefined },
+            { patterns: ['a'], expected: ['a'] },
+            { patterns: ['', 'a', undefined ], expected: ['a'] },
+        ])('basic cases [%#]', ({ patterns, expected }) => {
+            expect(normalizePatterns(patterns)).toEqual(expected);
         });
     });
 });

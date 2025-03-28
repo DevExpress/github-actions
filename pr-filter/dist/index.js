@@ -16,8 +16,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.execCommand = void 0;
+exports.setOutputs = exports.execCommand = void 0;
+const core_1 = __nccwpck_require__(5316);
 const exec_1 = __nccwpck_require__(110);
+const serialization_utils_1 = __nccwpck_require__(9091);
 function execCommand(command) {
     return __awaiter(this, void 0, void 0, function* () {
         const { stdout, stderr, exitCode } = yield (0, exec_1.getExecOutput)(command);
@@ -28,6 +30,12 @@ function execCommand(command) {
     });
 }
 exports.execCommand = execCommand;
+function setOutputs(values) {
+    for (const [key, value] of Object.entries(values)) {
+        (0, core_1.setOutput)(key, (0, serialization_utils_1.stringifyForShell)(value));
+    }
+}
+exports.setOutputs = setOutputs;
 
 
 /***/ }),
@@ -41,7 +49,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.outputs = exports.inputs = void 0;
 exports.inputs = {
     GH_TOKEN: 'gh-token',
-    OUTPUT: 'output',
     PATHS: 'paths',
 };
 exports.outputs = {
@@ -126,7 +133,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.filterPaths = void 0;
+exports.testPath = exports.normalizePatterns = exports.filterPaths = void 0;
 const core = __importStar(__nccwpck_require__(5316));
 const minimatch_1 = __nccwpck_require__(148);
 const NEGATION = '!';
@@ -144,14 +151,26 @@ function filterPaths(paths, patterns) {
 }
 exports.filterPaths = filterPaths;
 function filterPathsImpl(paths, patterns) {
-    return paths.filter(path => {
-        return patterns.reduce((prevResult, pattern) => {
-            return pattern.startsWith(NEGATION)
-                ? prevResult && !match(path, pattern.substring(1))
-                : prevResult || match(path, pattern);
-        }, false);
-    });
+    const normalizedPatterns = normalizePatterns(patterns);
+    return normalizedPatterns === undefined
+        ? paths
+        : paths.filter(path => testPath(path, normalizedPatterns));
 }
+function normalizePatterns(patterns) {
+    if (!patterns)
+        return undefined;
+    const notEmptyPatterns = patterns.filter(p => p != undefined && p.length > 0);
+    return (notEmptyPatterns.length > 0 ? notEmptyPatterns : undefined);
+}
+exports.normalizePatterns = normalizePatterns;
+function testPath(path, patterns) {
+    return patterns.reduce((prevResult, pattern) => {
+        return pattern.startsWith(NEGATION)
+            ? prevResult && !match(path, pattern.substring(1))
+            : prevResult || match(path, pattern);
+    }, false);
+}
+exports.testPath = testPath;
 
 
 /***/ }),
@@ -249,12 +268,12 @@ function getChangedFilesImpl(token) {
                 core.setFailed('Getting changed files only works on pull request events.');
                 return [];
             }
-            const files = yield octokit.paginate(octokit.rest.pulls.listFiles, {
+            const entries = yield octokit.paginate(octokit.rest.pulls.listFiles, {
                 owner: github_1.context.repo.owner,
                 repo: github_1.context.repo.repo,
                 pull_number: github_1.context.payload.pull_request.number,
             });
-            return files.map(file => file.filename);
+            return entries.map(({ filename, status }) => ({ path: filename, status }));
         }
         catch (error) {
             core.setFailed(`Getting changed files failed with error: ${error}`);
@@ -262,6 +281,44 @@ function getChangedFilesImpl(token) {
         }
     });
 }
+
+
+/***/ }),
+
+/***/ 9091:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.stringifyForShell = void 0;
+function stringifyArrayItem(item) {
+    switch (typeof item) {
+        case 'number':
+            return item.toString();
+        case 'string':
+            return `'${item}'`;
+        default:
+            return JSON.stringify(item);
+    }
+}
+function stringifyForShell(value) {
+    switch (typeof value) {
+        case 'string':
+            return value;
+        case 'object':
+            if (Array.isArray(value)) {
+                return value.map(stringifyArrayItem).join(' ');
+            }
+            if (value === null) {
+                return '';
+            }
+            return value.toString();
+        default:
+            return JSON.stringify(value);
+    }
+}
+exports.stringifyForShell = stringifyForShell;
 
 
 /***/ }),
@@ -33659,7 +33716,7 @@ function run() {
         try {
             const pathPatterns = core.getInput(common_1.inputs.PATHS).split(';');
             const token = core.getInput(common_1.inputs.GH_TOKEN, { required: true });
-            const changedFiles = yield (0, common_1.getChangedFiles)(token);
+            const changedFiles = (yield (0, common_1.getChangedFiles)(token)).map(e => e.path);
             const filteredFiles = (0, common_1.filterPaths)(changedFiles, pathPatterns);
             core.setOutput(common_1.outputs.RESULT, filteredFiles.length > 0);
         }

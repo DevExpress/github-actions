@@ -24,11 +24,23 @@ function filterPathsImpl(
     paths: string[],
     patterns: string[],
 ): string[] {
-    return paths.filter(path => {
-        return patterns.reduce((prevResult, pattern) => {
-            return pattern.startsWith(NEGATION)
-                ? prevResult && !match(path, pattern.substring(1))
-                : prevResult || match(path, pattern);
-        }, false);
-    });
+    const normalizedPatterns = normalizePatterns(patterns);
+    return normalizedPatterns === undefined
+        ? paths
+        : paths.filter(path => testPath(path, normalizedPatterns));
+}
+
+export function normalizePatterns(patterns?: (string | undefined)[]): string[] | undefined {
+    if(!patterns) return undefined;
+
+    const notEmptyPatterns = patterns.filter(p => p != undefined && p.length > 0);
+    return (notEmptyPatterns.length > 0 ? notEmptyPatterns : undefined) as ReturnType<typeof normalizePatterns>;
+}
+
+export function testPath(path: string, patterns: string[]): boolean {
+    return patterns.reduce((prevResult, pattern) => {
+        return pattern.startsWith(NEGATION)
+            ? prevResult && !match(path, pattern.substring(1))
+            : prevResult || match(path, pattern);
+    }, false);
 }
