@@ -14,6 +14,11 @@
     "dist": "ncc build"
   },
   "devDependencies": {
-    "common": "workspace:*"
+    "@actions/core": "catalog:",
+    "@types/node": "catalog:",
+    "@vercel/ncc": "catalog:",
+    "common": "workspace:*",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
   }
 }
