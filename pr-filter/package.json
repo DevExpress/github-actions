@@ -12,5 +12,8 @@
     "clean": "rimraf dist lib",
     "build": "tsc",
     "package": "ncc build"
+  },
+  "devDependencies": {
+    "common": "workspace:*"
   }
 }
