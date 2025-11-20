@@ -12,6 +12,13 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "minimatch": "^10.0.1"
+    "@actions/core": "catalog:",
+    "@actions/exec": "catalog:",
+    "@actions/github": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "minimatch": "^10.0.1",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
   }
 }

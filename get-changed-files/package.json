@@ -11,6 +11,14 @@
   "scripts": {
     "clean": "rimraf dist lib",
     "build": "tsc",
-    "package": "ncc build"
+    "dist": "ncc build"
+  },
+  "devDependencies": {
+    "@actions/core": "catalog:",
+    "@types/node": "catalog:",
+    "@vercel/ncc": "catalog:",
+    "common": "workspace:*",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
   }
 }
