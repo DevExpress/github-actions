@@ -1,0 +1,31 @@
+name: Repository Check
+
+on:
+  workflow_call:
+
+jobs:
+  health-check:
+    name: Health check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate lock files
+        uses: DevExpress/github-actions/validate-lock-files@v1
+        with:
+          target: .
+          artifacts: artifacts
+
+      - name: Validate Node versions
+        uses: DevExpress/github-actions/validate-node-versions@v1
+        with:
+          target: .
+          artifacts: artifacts
+
+      - name: Upload validation results
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-check
+          path: artifacts/*.json
+          if-no-files-found: error

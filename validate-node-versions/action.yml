@@ -1,0 +1,17 @@
+name: Validate Node Versions
+description: A GitHub Action to validate Node.js versions in repositories
+
+inputs:
+  target:
+    type: string
+    description: The root path of the repository to validate Node versions
+    required: true
+
+  artifacts:
+    type: string
+    description: The path to the artifacts folder where reports will be saved
+    required: true
+
+runs:
+  using: node16
+  main: dist/index.js

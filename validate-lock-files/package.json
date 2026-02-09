@@ -1,0 +1,24 @@
+{
+  "name": "validate-lock-files",
+  "description": "GitHub action to validate lock files in repositories",
+  "version": "1.0.0",
+  "author": "Developer Express Inc.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "main": "lib/main.js",
+  "scripts": {
+    "clean": "rimraf dist lib",
+    "build": "tsc",
+    "dist": "ncc build"
+  },
+  "devDependencies": {
+    "@actions/core": "catalog:",
+    "@types/node": "catalog:",
+    "@vercel/ncc": "catalog:",
+    "code-scanning": "workspace:*",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
+  }
+}

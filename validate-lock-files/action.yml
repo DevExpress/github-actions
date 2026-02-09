@@ -1,0 +1,17 @@
+name: Validate Lock Files
+description: A GitHub Action to validate lock files in repositories
+
+inputs:
+  target:
+    type: string
+    description: The root path of the repository to validate lock files
+    required: true
+
+  artifacts:
+    type: string
+    description: The path to the artifacts folder where reports will be saved
+    required: true
+
+runs:
+  using: node16
+  main: dist/index.js

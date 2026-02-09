@@ -1,8 +1,11 @@
 packages:
+  - 'code-scanning'
   - 'common'
   - 'get-changed-files'
   - 'pr-filter'
   - 'send-teams-notification'
+  - 'validate-lock-files'
+  - 'validate-node-versions'
   - 'verify-version-change'
 
 catalog:
