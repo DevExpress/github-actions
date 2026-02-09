@@ -17,5 +17,5 @@ on:
 jobs:
   invoke:
     name: Invoke
-    uses: DevExpress/github-actions/.github/workflows/repository-check.yml@repo-check/v1
+    uses: DevExpress/github-actions/.github/workflows/repository-check.yml@repo-check/latest
 ```
