@@ -16,5 +16,5 @@ on:
 
 jobs:
   check:
-    uses: DevExpress/github-actions/.github/workflows/repository-check.yml@v1
+    uses: DevExpress/github-actions/.github/workflows/repository-check.yml@repo-check-v1
 ```

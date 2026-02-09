@@ -12,13 +12,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate lock files
-        uses: DevExpress/github-actions/validate-lock-files@v1
+        uses: DevExpress/github-actions/validate-lock-files@repo-check-v1
         with:
           target: .
           artifacts: artifacts
 
       - name: Validate Node versions
-        uses: DevExpress/github-actions/validate-node-versions@v1
+        uses: DevExpress/github-actions/validate-node-versions@repo-check-v1
         with:
           target: .
           artifacts: artifacts
