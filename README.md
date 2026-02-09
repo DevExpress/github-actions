@@ -15,6 +15,7 @@ on:
   push:
 
 jobs:
-  check:
-    uses: DevExpress/github-actions/.github/workflows/repository-check.yml@repo-check-v1
+  invoke:
+    name: Invoke
+    uses: DevExpress/github-actions/.github/workflows/repository-check.yml@repo-check/v1
 ```

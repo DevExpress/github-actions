@@ -4,8 +4,8 @@ on:
   workflow_call:
 
 jobs:
-  health-check:
-    name: Health check
+  repo-check:
+    name: Repository Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
