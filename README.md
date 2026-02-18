@@ -12,6 +12,7 @@ To use this workflow in another repository:
 name: Health Check
 
 on:
+  workflow_dispatch:
   push:
 
 jobs:
