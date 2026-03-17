@@ -10,7 +10,7 @@ catalog:
   '@actions/exec': 2.0.0
   '@actions/github': 8.0.1
   '@types/jest': ^29.5.12
-  '@types/node': ^16.18.105
+  '@types/node': ^20.19.37
   '@vercel/ncc': ^0.38.1
   rimraf: ^3.0.2
   ts-jest: ^29.2.4
