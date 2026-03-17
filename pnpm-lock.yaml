@@ -101,6 +101,9 @@ importers:
       '@actions/core':
         specifier: 'catalog:'
         version: 2.0.3
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.19.37
       '@vercel/ncc':
         specifier: 'catalog:'
         version: 0.38.4
