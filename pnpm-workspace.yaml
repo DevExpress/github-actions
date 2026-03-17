@@ -6,9 +6,9 @@ packages:
   - verify-version-change
 
 catalog:
-  '@actions/core': 1.11.1
-  '@actions/exec': 1.1.1
-  '@actions/github': 6.0.1
+  '@actions/core': 2.0.3
+  '@actions/exec': 2.0.0
+  '@actions/github': 8.0.1
   '@types/jest': ^29.5.12
   '@types/node': ^16.18.105
   '@vercel/ncc': ^0.38.1
@@ -21,4 +21,4 @@ overrides:
   axios@<=1.13.4: '>=1.13.5'
   minimatch@<=3.1.3: '^3.1.4'
   minimatch@>=10.0.0 <10.2.1: '^10.2.1'
-  undici@<6.23.0: '>=6.23.0'
+  undici@>=7.0.0 <7.24.0: '>=7.24.0'
