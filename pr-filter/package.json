@@ -5,7 +5,7 @@
   "author": "Developer Express Inc.",
   "license": "MIT",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   },
   "main": "lib/main.js",
   "scripts": {
@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@actions/core": "catalog:",
+    "@types/node": "catalog:",
     "@vercel/ncc": "catalog:",
     "common": "workspace:*",
     "rimraf": "catalog:",
