@@ -17,7 +17,7 @@
     "@actions/github": "catalog:",
     "@types/jest": "catalog:",
     "@types/node": "catalog:",
-    "minimatch": "^10.0.1",
+    "minimatch": "^10.2.4",
     "rimraf": "catalog:",
     "typescript": "catalog:"
   }

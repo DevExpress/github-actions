@@ -16,11 +16,11 @@
   "devDependencies": {
     "@actions/core": "catalog:",
     "@types/node": "catalog:",
-    "@types/semver": "^7.5.8",
+    "@types/semver": "^7.7.1",
     "@vercel/ncc": "catalog:",
     "common": "workspace:*",
-    "semver": "^7.6.3",
     "rimraf": "catalog:",
+    "semver": "^7.7.4",
     "typescript": "catalog:"
   }
 }
