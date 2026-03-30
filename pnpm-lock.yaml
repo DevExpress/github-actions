@@ -34,9 +34,6 @@ catalogs:
       specifier: ^4.9.5
       version: 4.9.5
 
-overrides:
-  minimatch@>=10.0.0 <10.2.1: ^10.2.1
-
 importers:
 
   .:
