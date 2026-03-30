@@ -42,7 +42,7 @@ importers:
         specifier: 'catalog:'
         version: 29.5.14
       '@types/node':
-        specifier: ^20.14.8
+        specifier: 'catalog:'
         version: 20.19.37
       jest:
         specifier: ^29.7.0
