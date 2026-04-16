@@ -23,9 +23,15 @@ assert(entryPath, `Package "${packageName}" is not installed. It must be install
 
 // If it's a symlink (pnpm), replace the target content to preserve the resolution chain.
 // pnpm places dependencies as siblings of the target, so the symlink must stay intact.
-const targetPath = lstatSync(entryPath).isSymbolicLink()
-  ? realpathSync(entryPath)
-  : entryPath;
+const isSymlink = lstatSync(entryPath).isSymbolicLink();
+const targetPath = isSymlink ? realpathSync(entryPath) : entryPath;
+
+if (isSymlink) {
+  assert(
+    targetPath.startsWith(process.cwd() + '/'),
+    `Symlink target "${targetPath}" resolves outside the project`,
+  );
+}
 
 rmSync(targetPath, { recursive: true, force: true });
 mkdirSync(targetPath, { recursive: true });
