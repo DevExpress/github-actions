@@ -31,7 +31,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         npm pack @devexpress/devextreme-internal@${{ steps.devextreme_version.outputs.version }} --registry https://npm.pkg.github.com
-        echo "packageFile=$(find . -maxdepth 1 -name 'devexpress-devextreme-internal-*.tgz')" >> $GITHUB_OUTPUT
+        echo "packageFile=$(find . -maxdepth 1 -name 'devexpress-devextreme-internal-*.tgz' -print -quit)" >> $GITHUB_OUTPUT
 
     - name: Check if DevExtreme File is Downloaded
       if: steps.download_devextreme.outputs.packageFile == ''
@@ -51,7 +51,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         npm pack @devexpress/devextreme-dist-internal@${{ steps.devextreme_version.outputs.version }} --registry https://npm.pkg.github.com
-        echo "packageFile=$(find . -maxdepth 1 -name 'devexpress-devextreme-dist-internal-*.tgz')" >> $GITHUB_OUTPUT
+        echo "packageFile=$(find . -maxdepth 1 -name 'devexpress-devextreme-dist-internal-*.tgz' -print -quit)" >> $GITHUB_OUTPUT
 
     - name: Check if DevExtreme-Dist File is Downloaded
       if: inputs.install-dist && steps.download_devextreme_dist.outputs.packageFile == ''

@@ -28,4 +28,9 @@ if (lstatSync(entryPath).isSymbolicLink()) {
 }
 
 mkdirSync(entryPath, { recursive: true });
+
+const listing = execFileSync('tar', ['-tzf', packageFile]).toString();
+const unsafeEntry = listing.split('\n').find(e => e.includes('..') || e.startsWith('/'));
+assert(!unsafeEntry, `Archive contains unsafe path: ${unsafeEntry}`);
+
 execFileSync('tar', ['-xzf', packageFile, '-C', entryPath, '--strip-components=1']);
