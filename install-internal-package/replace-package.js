@@ -21,17 +21,18 @@ for (const searchDir of cwdRequire.resolve.paths(packageName) || []) {
 
 assert(entryPath, `Package "${packageName}" is not installed. It must be installed before it can be replaced.`);
 
-// If it's a symlink (pnpm), replace the target content to preserve the resolution chain.
-// pnpm places dependencies as siblings of the target, so the symlink must stay intact.
-const isSymlink = lstatSync(entryPath).isSymbolicLink();
-const targetPath = isSymlink ? realpathSync(entryPath) : entryPath;
+const targetPath = (() => {
+  if (!lstatSync(entryPath).isSymbolicLink()) {
+    return entryPath;
+  }
 
-if (isSymlink) {
-  assert(
-    targetPath.startsWith(process.cwd() + '/'),
-    `Symlink target "${targetPath}" resolves outside the project`,
-  );
-}
+  // If it's a symlink (pnpm), replace the target content to preserve the resolution chain.
+  // pnpm places dependencies as siblings of the target, so the symlink must stay intact.
+  const resolved = realpathSync(entryPath);
+  assert(resolved.startsWith(process.cwd() + '/'), `Symlink target "${resolved}" resolves outside the project`);
+  return resolved;
+
+})();
 
 rmSync(targetPath, { recursive: true, force: true });
 mkdirSync(targetPath, { recursive: true });
