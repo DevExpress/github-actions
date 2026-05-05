@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./lib",
     "rootDir": "./src",
-    "declaration": true
+    "declaration": true,
+    "types": ["node", "jest"]
   }
 }
