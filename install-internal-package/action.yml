@@ -31,7 +31,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         npm pack @devexpress/devextreme-internal@${{ steps.devextreme_version.outputs.version }} --registry https://npm.pkg.github.com
-        echo "packageFile=$(find . -name devexpress-devextreme-internal-*.tgz)" >> $GITHUB_OUTPUT
+        echo "packageFile=$(find . -maxdepth 1 -name 'devexpress-devextreme-internal-*.tgz' -print -quit)" >> $GITHUB_OUTPUT
 
     - name: Check if DevExtreme File is Downloaded
       if: steps.download_devextreme.outputs.packageFile == ''
@@ -40,31 +40,27 @@ runs:
       run: exit 1
 
     - name: Install Internal devextreme Package
-      env:
-        PACKAGE_FILE: ${{ steps.download_devextreme.outputs.packageFile }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: npm i devextreme@$PACKAGE_FILE
+      run: node "$GITHUB_ACTION_PATH/replace-package.js" devextreme "${{ steps.download_devextreme.outputs.packageFile }}"
 
     - name: Download Internal devextreme-dist Package
-      if: inputs.install-dist
+      if: inputs.install-dist == 'true'
       id: download_devextreme_dist
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
         npm pack @devexpress/devextreme-dist-internal@${{ steps.devextreme_version.outputs.version }} --registry https://npm.pkg.github.com
-        echo "packageFile=$(find . -name devexpress-devextreme-dist-internal-*.tgz)" >> $GITHUB_OUTPUT
+        echo "packageFile=$(find . -maxdepth 1 -name 'devexpress-devextreme-dist-internal-*.tgz' -print -quit)" >> $GITHUB_OUTPUT
 
     - name: Check if DevExtreme-Dist File is Downloaded
-      if: inputs.install-dist && steps.download_devextreme_dist.outputs.packageFile == ''
+      if: inputs.install-dist == 'true' && steps.download_devextreme_dist.outputs.packageFile == ''
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: exit 1
 
     - name: Install Internal devextreme-dist Package
-      if: inputs.install-dist
-      env:
-        PACKAGE_FILE: ${{ steps.download_devextreme_dist.outputs.packageFile }}
+      if: inputs.install-dist == 'true'
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: npm i devextreme-dist@$PACKAGE_FILE
+      run: node "$GITHUB_ACTION_PATH/replace-package.js" devextreme-dist "${{ steps.download_devextreme_dist.outputs.packageFile }}"
