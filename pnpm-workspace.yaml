@@ -2,6 +2,7 @@ packages:
   - 'code-scanning'
   - 'common'
   - 'get-changed-files'
+  - 'pnpm-audit'
   - 'pr-filter'
   - 'send-teams-notification'
   - 'validate-lock-files'

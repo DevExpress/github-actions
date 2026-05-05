@@ -23,6 +23,12 @@ jobs:
           target: .
           artifacts: artifacts
 
+      - name: Check pnpm audit
+        uses: DevExpress/github-actions/pnpm-audit@repo-check/latest
+        with:
+          target: .
+          artifacts: artifacts
+
       - name: Upload validation results
         uses: actions/upload-artifact@v4
         with:

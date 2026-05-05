@@ -1,0 +1,24 @@
+{
+  "name": "pnpm-audit",
+  "description": "GitHub action to run pnpm audit and report vulnerabilities",
+  "version": "1.0.0",
+  "author": "Developer Express Inc.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "main": "lib/main.js",
+  "scripts": {
+    "clean": "rimraf dist lib",
+    "build": "tsc",
+    "dist": "ncc build"
+  },
+  "devDependencies": {
+    "@actions/core": "catalog:",
+    "@types/node": "catalog:",
+    "@vercel/ncc": "catalog:",
+    "code-scanning": "workspace:*",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
+  }
+}

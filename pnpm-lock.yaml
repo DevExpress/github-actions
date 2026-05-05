@@ -126,6 +126,27 @@ importers:
         specifier: 'catalog:'
         version: 4.9.5
 
+  pnpm-audit:
+    devDependencies:
+      '@actions/core':
+        specifier: 'catalog:'
+        version: 2.0.3
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.19.37
+      '@vercel/ncc':
+        specifier: 'catalog:'
+        version: 0.38.4
+      code-scanning:
+        specifier: workspace:*
+        version: link:../code-scanning
+      rimraf:
+        specifier: 'catalog:'
+        version: 3.0.2
+      typescript:
+        specifier: 'catalog:'
+        version: 4.9.5
+
   pr-filter:
     devDependencies:
       '@actions/core':
