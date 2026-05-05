@@ -11,14 +11,25 @@ async function run(): Promise<void> {
     const rootPath = core.getInput(ROOT_PAT, { required: true });
     const artifactsPath = core.getInput(ARTIFACTS_PATH, { required: true });
 
-    const basePath = process.env.INIT_CWD || process.cwd();
+    const basePath = process.env.GITHUB_WORKSPACE || process.cwd();
     const targetPath = path.resolve(basePath, rootPath);
     const resolvedArtifactsPath = path.resolve(basePath, artifactsPath);
 
-    await pnpmAudit({ targetPath, artifactsPath: resolvedArtifactsPath });
+    core.info(`Target path: ${targetPath}`);
+    core.info(`Artifacts path: ${resolvedArtifactsPath}`);
+
+    const report = await pnpmAudit({ targetPath, artifactsPath: resolvedArtifactsPath });
+
+    if (!report.succeeded) {
+      core.warning(
+        `Found ${report.totalVulnerabilities} vulnerabilities in ${report.packagesWithVulnerabilities} packages`,
+      );
+    }
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message);
+    } else {
+      core.setFailed(String(error));
     }
   }
 }

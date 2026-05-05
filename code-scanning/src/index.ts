@@ -8,3 +8,8 @@ export {
   type NodeVersionReport,
   NODE_VERSIONS_REPORT_FILENAME,
 } from './validate-node-versions';
+export {
+  pnpmAudit,
+  type PnpmAuditReport,
+  PNPM_AUDIT_REPORT_FILENAME,
+} from './pnpm-audit';

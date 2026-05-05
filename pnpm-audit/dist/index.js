@@ -36873,7 +36873,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(1751));
-const path = __importStar(__nccwpck_require__(6928));
+const path = __importStar(__nccwpck_require__(6760));
 const code_scanning_1 = __nccwpck_require__(6693);
 const ROOT_PAT = 'target';
 const ARTIFACTS_PATH = 'artifacts';
@@ -36881,14 +36881,22 @@ async function run() {
     try {
         const rootPath = core.getInput(ROOT_PAT, { required: true });
         const artifactsPath = core.getInput(ARTIFACTS_PATH, { required: true });
-        const basePath = process.env.INIT_CWD || process.cwd();
+        const basePath = process.env.GITHUB_WORKSPACE || process.cwd();
         const targetPath = path.resolve(basePath, rootPath);
         const resolvedArtifactsPath = path.resolve(basePath, artifactsPath);
-        await (0, code_scanning_1.pnpmAudit)({ targetPath, artifactsPath: resolvedArtifactsPath });
+        core.info(`Target path: ${targetPath}`);
+        core.info(`Artifacts path: ${resolvedArtifactsPath}`);
+        const report = await (0, code_scanning_1.pnpmAudit)({ targetPath, artifactsPath: resolvedArtifactsPath });
+        if (!report.succeeded) {
+            core.warning(`Found ${report.totalVulnerabilities} vulnerabilities in ${report.packagesWithVulnerabilities} packages`);
+        }
     }
     catch (error) {
         if (error instanceof Error) {
             core.setFailed(error.message);
+        }
+        else {
+            core.setFailed(String(error));
         }
     }
 }
@@ -37062,6 +37070,14 @@ module.exports = require("node:http2");
 
 "use strict";
 module.exports = require("node:net");
+
+/***/ }),
+
+/***/ 6760:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path");
 
 /***/ }),
 
