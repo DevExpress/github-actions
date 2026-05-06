@@ -1,29 +1,12 @@
 import * as path from 'path';
 import * as yaml from 'yaml';
 import { FileSystem, NodeFileSystem } from './file-system';
-
-export const NODE_VERSIONS_REPORT_FILENAME = 'node-versions-report.json';
-
-export interface NodeVersionSource {
-  file: string;
-  location: string; // More specific location within the file (e.g., "engines.node", "setup-node step")
-  version: string; // The version specifier as found
-  normalizedVersion?: string; // Parsed/normalized version
-}
-
-export interface NodeVersionIssue {
-  type: 'missing' | 'outdated' | 'unsafe' | 'inconsistent';
-  severity: 'error' | 'warning';
-  message: string;
-  file?: string;
-  suggestedVersion?: string;
-}
-
-export interface NodeVersionReport {
-  succeeded: boolean;
-  detectedVersions: NodeVersionSource[];
-  issues: NodeVersionIssue[];
-}
+import {
+  NODE_VERSIONS_REPORT_FILENAME,
+  type NodeVersionIssue,
+  type NodeVersionReport,
+  type NodeVersionSource,
+} from './shared-types';
 
 // Version requirements
 const MINIMUM_SAFE_MAJOR = 22;

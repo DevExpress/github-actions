@@ -3,22 +3,11 @@ import * as yaml from 'yaml';
 import * as micromatch from 'micromatch';
 
 import { FileSystem, NodeFileSystem } from './file-system';
-
-export const LOCK_FILES_REPORT_FILENAME = 'lock-files-report.json';
-
-interface LockFileValidationEntry {
-  packageJsonPath: string;
-  lockFilePaths: string[];
-  workspacePackage?: boolean;
-}
-
-export interface ValidationReport {
-  succeeded: boolean;
-  totalPackages: number;
-  invalidPackages: number;
-  validPackageFiles: LockFileValidationEntry[];
-  invalidPackageFiles: string[];
-}
+import {
+  LOCK_FILES_REPORT_FILENAME,
+  type LockFileValidationEntry,
+  type ValidationReport,
+} from './shared-types';
 
 const LOCK_FILES = [
   'package-lock.json', // npm

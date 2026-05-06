@@ -1,13 +1,18 @@
 export {
   validateLockFiles,
-  type ValidationReport,
-  LOCK_FILES_REPORT_FILENAME,
 } from './validate-lock-files';
 export {
   validateNodeVersions,
-  type NodeVersionReport,
-  NODE_VERSIONS_REPORT_FILENAME,
 } from './validate-node-versions';
+export {
+  type ValidationReport,
+  type NodeVersionReport,
+  type NodeVersionSource,
+  type NodeVersionIssue,
+  type LockFileValidationEntry,
+  LOCK_FILES_REPORT_FILENAME,
+  NODE_VERSIONS_REPORT_FILENAME,
+} from './shared-types';
 export {
   pnpmAudit,
   type PnpmAuditReport,
