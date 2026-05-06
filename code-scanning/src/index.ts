@@ -15,6 +15,11 @@ export {
 } from './shared-types';
 export {
   pnpmAudit,
-  type PnpmAuditReport,
-  PNPM_AUDIT_REPORT_FILENAME,
 } from './pnpm-audit';
+export {
+  type PnpmAuditReport,
+  type PackageAuditResult,
+  type AuditVulnerability,
+  AuditSeverity,
+  PNPM_AUDIT_REPORT_FILENAME,
+} from './shared-types';

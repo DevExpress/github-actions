@@ -3,52 +3,15 @@ import { promisify } from 'node:util';
 import * as path from 'path';
 
 import { FileSystem, NodeFileSystem } from './file-system';
+import {
+  AuditSeverity,
+  PNPM_AUDIT_REPORT_FILENAME,
+  type AuditVulnerability,
+  type PackageAuditResult,
+  type PnpmAuditReport,
+} from './shared-types';
 
 const execFileAsync = promisify(execFile);
-
-export const PNPM_AUDIT_REPORT_FILENAME = 'pnpm-audit-report.json';
-
-// #region Types
-
-export enum AuditSeverity {
-  Info = 0,
-  Low = 1,
-  Moderate = 2,
-  High = 3,
-  Critical = 4,
-}
-
-export interface AuditVulnerability {
-  id: string;
-  name: string;
-  severity: string;
-  severityLevel: AuditSeverity;
-  title: string;
-  url?: string;
-  vulnerableRange?: string;
-  patchedVersions?: string;
-  fixAvailable: boolean;
-}
-
-export interface PackageAuditResult {
-  directory: string;
-  relativeDirectory: string;
-  vulnerabilities: AuditVulnerability[];
-  error?: string;
-  isWorkspaceMember: boolean;
-}
-
-export interface PnpmAuditReport {
-  succeeded: boolean;
-  rootPath: string;
-  packages: PackageAuditResult[];
-  totalVulnerabilities: number;
-  bySeverity: Record<string, number>;
-  packagesWithVulnerabilities: number;
-  strayPackages: string[];
-}
-
-// #endregion
 
 // #region pnpm audit parsing
 
