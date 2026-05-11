@@ -21,19 +21,19 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: Validate lock files
-        uses: DevExpress/github-actions/validate-lock-files@repo-check/latest
+        uses: DevExpress/github-actions/validate-lock-files@repository-check-next
         with:
           target: .
           artifacts: artifacts
 
       - name: Validate Node versions
-        uses: DevExpress/github-actions/validate-node-versions@repo-check/latest
+        uses: DevExpress/github-actions/validate-node-versions@repository-check-next
         with:
           target: .
           artifacts: artifacts
 
       - name: Check pnpm audit
-        uses: DevExpress/github-actions/pnpm-audit@repo-check/latest
+        uses: DevExpress/github-actions/pnpm-audit@repository-check-next
         with:
           target: .
           artifacts: artifacts
