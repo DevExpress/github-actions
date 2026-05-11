@@ -21,6 +21,7 @@
     "@types/jest": "catalog:",
     "@types/micromatch": "^4.0.9",
     "@types/node": "catalog:",
+    "json5": "^2.2.3",
     "micromatch": "^4.0.8",
     "rimraf": "catalog:",
     "ts-jest": "catalog:",

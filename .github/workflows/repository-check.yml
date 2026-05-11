@@ -2,6 +2,12 @@ name: Repository Check
 
 on:
   workflow_call:
+    inputs:
+      config:
+        type: string
+        description: 'JSON5 configuration object (e.g. { ignoredAdvisories: ["GHSA-..."] })'
+        required: false
+        default: '{}'
 
 jobs:
   repo-check:
@@ -31,6 +37,7 @@ jobs:
         with:
           target: .
           artifacts: artifacts
+          config: ${{ inputs.config }}
 
       - name: Upload validation results
         uses: actions/upload-artifact@v4

@@ -14,6 +14,9 @@ export {
   NODE_VERSIONS_REPORT_FILENAME,
 } from './shared-types';
 export {
+  parseRepoCheckConfig,
+} from './config';
+export {
   pnpmAudit,
 } from './pnpm-audit';
 export {
