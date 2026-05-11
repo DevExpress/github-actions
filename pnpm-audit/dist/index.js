@@ -449,13 +449,23 @@ function filterIgnoredAdvisories(packages, ignoredAdvisories) {
     if (ignoredSet.size === 0) {
         return { processedPackages: packages, ignoredVulnerabilities: [] };
     }
+    const isIgnored = (v) => {
+        if (ignoredSet.has(v.id))
+            return true;
+        if (v.url) {
+            const ghsaMatch = v.url.match(/\/(GHSA-[\w-]+)$/);
+            if (ghsaMatch && ignoredSet.has(ghsaMatch[1]))
+                return true;
+        }
+        return false;
+    };
     const ignoredVulnerabilities = [];
     const processedPackages = packages.map((pkg) => {
-        const ignored = pkg.vulnerabilities.filter((v) => ignoredSet.has(v.id));
+        const ignored = pkg.vulnerabilities.filter(isIgnored);
         if (ignored.length === 0)
             return pkg;
         ignoredVulnerabilities.push(...ignored);
-        return { ...pkg, vulnerabilities: pkg.vulnerabilities.filter((v) => !ignoredSet.has(v.id)) };
+        return { ...pkg, vulnerabilities: pkg.vulnerabilities.filter((v) => !isIgnored(v)) };
     });
     return { processedPackages, ignoredVulnerabilities };
 }

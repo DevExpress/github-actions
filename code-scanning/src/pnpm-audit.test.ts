@@ -1,13 +1,14 @@
 import { filterIgnoredAdvisories } from './pnpm-audit';
 import { AuditSeverity, type AuditVulnerability, type PackageAuditResult } from './shared-types';
 
-function vuln(id: string, name = id): AuditVulnerability {
+function vuln(id: string, name = id, url?: string): AuditVulnerability {
   return {
     id,
     name,
     severity: 'high',
     severityLevel: AuditSeverity.High,
     title: `${name} vulnerability`,
+    url,
     fixAvailable: false,
   };
 }
@@ -85,5 +86,26 @@ describe('filterIgnoredAdvisories', () => {
     const result = filterIgnoredAdvisories(packages, ['1']);
 
     expect(result.processedPackages[1]).toBe(packages[1]);
+  });
+
+  it('should match by GHSA ID from vulnerability url', () => {
+    const v1 = vuln('100', 'pkg-a', 'https://github.com/advisories/GHSA-xxxx-yyyy-zzzz');
+    const v2 = vuln('200', 'pkg-b', 'https://github.com/advisories/GHSA-aaaa-bbbb-cccc');
+    const packages = [pkg('a', [v1, v2])];
+    const result = filterIgnoredAdvisories(packages, ['GHSA-xxxx-yyyy-zzzz']);
+
+    expect(result.processedPackages[0].vulnerabilities).toEqual([v2]);
+    expect(result.ignoredVulnerabilities).toEqual([v1]);
+  });
+
+  it('should match by both numeric id and GHSA id', () => {
+    const v1 = vuln('100', 'pkg-a', 'https://github.com/advisories/GHSA-aaaa-bbbb-cccc');
+    const v2 = vuln('200', 'pkg-b', 'https://github.com/advisories/GHSA-dddd-eeee-ffff');
+    const v3 = vuln('300', 'pkg-c');
+    const packages = [pkg('a', [v1, v2, v3])];
+    const result = filterIgnoredAdvisories(packages, ['GHSA-aaaa-bbbb-cccc', '300']);
+
+    expect(result.processedPackages[0].vulnerabilities).toEqual([v2]);
+    expect(result.ignoredVulnerabilities).toHaveLength(2);
   });
 });
