@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "tsc",
-    "test": "jest",
+    "test": "tsc --noEmit -p tsconfig.test.json && jest --config ../jest.config.js",
     "scan:lock-files": "tsx scripts/run.ts validateLockFiles",
     "scan:node-versions": "tsx scripts/run.ts validateNodeVersions",
     "scan:pnpm-audit": "tsx scripts/run.ts pnpmAudit",
