@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "tsc",
-    "test": "jest",
+    "test": "tsc --noEmit -p tsconfig.test.json && jest --config ../jest.config.js",
     "scan:lock-files": "tsx scripts/run.ts validateLockFiles",
     "scan:node-versions": "tsx scripts/run.ts validateNodeVersions",
     "scan:pnpm-audit": "tsx scripts/run.ts pnpmAudit",
@@ -21,6 +21,7 @@
     "@types/jest": "catalog:",
     "@types/micromatch": "^4.0.9",
     "@types/node": "catalog:",
+    "json5": "^2.2.3",
     "micromatch": "^4.0.8",
     "rimraf": "catalog:",
     "ts-jest": "catalog:",

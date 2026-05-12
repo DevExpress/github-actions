@@ -76,6 +76,8 @@ export interface PnpmAuditReport {
   bySeverity: Record<string, number>;
   packagesWithVulnerabilities: number;
   strayPackages: string[];
+  ignoredAdvisories?: string[];
+  ignoredVulnerabilities?: AuditVulnerability[];
 }
 export const PNPM_AUDIT_REPORT_FILENAME = 'pnpm-audit-report.json';
 //#endregion

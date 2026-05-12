@@ -12,6 +12,12 @@ inputs:
     description: The path to the artifacts folder where reports will be saved
     required: true
 
+  config:
+    type: string
+    description: JSON5 configuration object for the audit
+    required: false
+    default: '{}'
+
 runs:
   using: node20
   main: dist/index.js

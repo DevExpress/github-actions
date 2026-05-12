@@ -356,14 +356,45 @@ async function runPnpmAudit(
 
 // #region Main
 
+export function filterIgnoredAdvisories(
+  packages: PackageAuditResult[],
+  ignoredAdvisories?: string[],
+): { processedPackages: PackageAuditResult[]; ignoredVulnerabilities: AuditVulnerability[] } {
+  const ignoredSet = new Set(ignoredAdvisories ?? []);
+  if (ignoredSet.size === 0) {
+    return { processedPackages: packages, ignoredVulnerabilities: [] };
+  }
+
+  const isIgnored = (v: AuditVulnerability): boolean => {
+    if (ignoredSet.has(v.id)) return true;
+    if (v.url) {
+      const ghsaMatch = v.url.match(/\/(GHSA-[\w-]+)$/);
+      if (ghsaMatch && ignoredSet.has(ghsaMatch[1])) return true;
+    }
+    return false;
+  };
+
+  const ignoredVulnerabilities: AuditVulnerability[] = [];
+  const processedPackages = packages.map((pkg) => {
+    const ignored = pkg.vulnerabilities.filter(isIgnored);
+    if (ignored.length === 0) return pkg;
+    ignoredVulnerabilities.push(...ignored);
+    return { ...pkg, vulnerabilities: pkg.vulnerabilities.filter((v) => !isIgnored(v)) };
+  });
+
+  return { processedPackages, ignoredVulnerabilities };
+}
+
 export async function pnpmAudit({
   targetPath,
   artifactsPath,
   fileSystem,
+  ignoredAdvisories,
 }: {
   targetPath: string;
   artifactsPath: string;
   fileSystem?: FileSystem;
+  ignoredAdvisories?: string[];
 }): Promise<PnpmAuditReport> {
   const fs = fileSystem || new NodeFileSystem();
   const resolvedRoot = path.resolve(targetPath);
@@ -496,25 +527,32 @@ export async function pnpmAudit({
     }
   }
 
+  const { processedPackages, ignoredVulnerabilities } = filterIgnoredAdvisories(
+    packages,
+    ignoredAdvisories,
+  );
+
   // Build result
-  const totalVulnerabilities = packages.reduce((sum, p) => sum + p.vulnerabilities.length, 0);
+  const totalVulnerabilities = processedPackages.reduce((sum, p) => sum + p.vulnerabilities.length, 0);
   const bySeverity: Record<string, number> = {};
-  for (const pkg of packages) {
+  for (const pkg of processedPackages) {
     for (const v of pkg.vulnerabilities) {
       bySeverity[v.severity] = (bySeverity[v.severity] ?? 0) + 1;
     }
   }
-  const packagesWithVulnerabilities = packages.filter((p) => p.vulnerabilities.length > 0).length;
+  const packagesWithVulnerabilities = processedPackages.filter((p) => p.vulnerabilities.length > 0).length;
   const strayPackages = strayPackageDirs.map((d) => path.relative(resolvedRoot, d) || '.');
 
   const report: PnpmAuditReport = {
     succeeded: totalVulnerabilities === 0,
     rootPath: resolvedRoot,
-    packages,
+    packages: processedPackages,
     totalVulnerabilities,
     bySeverity,
     packagesWithVulnerabilities,
     strayPackages,
+    ignoredAdvisories: ignoredAdvisories?.length ? ignoredAdvisories : undefined,
+    ignoredVulnerabilities: ignoredVulnerabilities.length > 0 ? ignoredVulnerabilities : undefined,
   };
 
   // Summary output
