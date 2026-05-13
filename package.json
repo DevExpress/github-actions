@@ -9,9 +9,6 @@
     "node": "24.15.0",
     "pnpm": ">=10.22.0"
   },
-  "volta": {
-    "node": "24.15.0"
-  },
   "homepage": "https://github.com/DevExpress/github-actions#readme",
   "bugs": {
     "url": "https://github.com/DevExpress/github-actions/issues"
