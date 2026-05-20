@@ -20,7 +20,7 @@
     "@vercel/ncc": "catalog:",
     "common": "workspace:*",
     "rimraf": "catalog:",
-    "semver": "^7.7.4",
+    "semver": "^7.8.0",
     "typescript": "catalog:"
   }
 }
