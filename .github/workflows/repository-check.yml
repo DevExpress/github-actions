@@ -12,7 +12,7 @@ on:
 jobs:
   repo-check:
     name: Repository Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
