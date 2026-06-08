@@ -12,7 +12,10 @@ inputs:
     default: json
   input-file:
     description: Path to the SBOM file to validate.
-    required: true
+    required: false
+  input-files:
+    description: Newline-separated paths to SBOM files to validate.
+    required: false
 
 runs:
   using: composite
@@ -45,5 +48,27 @@ runs:
 
     - name: Validate SBOM
       shell: bash
+      env:
+        INPUT_FILE: ${{ inputs.input-file }}
+        INPUT_FILES: ${{ inputs.input-files }}
       run: |
-        cyclonedx validate --fail-on-errors --input-format "${{ inputs.input-format }}" --input-file "${{ inputs.input-file }}"
+        input_files=()
+
+        if [[ -n "$INPUT_FILE" ]]; then
+          input_files+=("$INPUT_FILE")
+        fi
+
+        while IFS= read -r input_file; do
+          if [[ -n "$input_file" ]]; then
+            input_files+=("$input_file")
+          fi
+        done <<< "$INPUT_FILES"
+
+        if [[ "${#input_files[@]}" -eq 0 ]]; then
+          echo "Set input-file or input-files."
+          exit 1
+        fi
+
+        for input_file in "${input_files[@]}"; do
+          cyclonedx validate --fail-on-errors --input-format "${{ inputs.input-format }}" --input-file "$input_file"
+        done
