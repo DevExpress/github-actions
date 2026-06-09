@@ -7,7 +7,7 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.execCommand = void 0;
+exports.execCommand = execCommand;
 const exec_1 = __nccwpck_require__(6932);
 async function execCommand(command) {
     const { stdout, stderr, exitCode } = await (0, exec_1.getExecOutput)(command);
@@ -16,7 +16,6 @@ async function execCommand(command) {
     }
     return stdout.trim();
 }
-exports.execCommand = execCommand;
 
 
 /***/ }),
@@ -46,13 +45,12 @@ exports.outputs = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ensureDir = void 0;
+exports.ensureDir = ensureDir;
 const fs_1 = __nccwpck_require__(9896);
 const path_1 = __nccwpck_require__(6928);
 function ensureDir(path) {
     (0, fs_1.mkdirSync)((0, path_1.dirname)(path), { recursive: true });
 }
-exports.ensureDir = ensureDir;
 
 
 /***/ }),
@@ -107,15 +105,25 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.filterPaths = void 0;
+exports.filterPaths = filterPaths;
 const core = __importStar(__nccwpck_require__(1751));
 const minimatch_1 = __nccwpck_require__(4804);
 const NEGATION = '!';
@@ -131,7 +139,6 @@ function filterPaths(paths, patterns) {
     core.info(`${filteredPaths.length} filtered paths: ${JSON.stringify(filteredPaths, undefined, 2)}`);
     return filteredPaths;
 }
-exports.filterPaths = filterPaths;
 function filterPathsImpl(paths, patterns) {
     return paths.filter(path => {
         return patterns.reduce((prevResult, pattern) => {
@@ -166,15 +173,26 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getChangedFiles = exports.getPrRevisionRange = void 0;
+exports.getPrRevisionRange = getPrRevisionRange;
+exports.getChangedFiles = getChangedFiles;
 const core = __importStar(__nccwpck_require__(1751));
 const github_1 = __nccwpck_require__(1011);
 const common_utils_1 = __nccwpck_require__(4514);
@@ -185,7 +203,6 @@ async function getPrRevisionRange() {
         return r;
     });
 }
-exports.getPrRevisionRange = getPrRevisionRange;
 async function getPrRevisionRangeImpl() {
     switch (github_1.context.eventName) {
         case 'pull_request':
@@ -213,7 +230,6 @@ async function getChangedFiles(token) {
         return files;
     });
 }
-exports.getChangedFiles = getChangedFiles;
 async function getChangedFilesImpl(token) {
     try {
         const octokit = (0, github_1.getOctokit)(token);
@@ -2452,7 +2468,7 @@ const Context = __importStar(__nccwpck_require__(9833));
 const Utils = __importStar(__nccwpck_require__(8187));
 // octokit + plugins
 const core_1 = __nccwpck_require__(536);
-const plugin_rest_endpoint_methods_1 = __nccwpck_require__(2287);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(7477);
 const plugin_paginate_rest_1 = __nccwpck_require__(6602);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
@@ -31817,13 +31833,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36563,7 +36589,7 @@ paginateRest.VERSION = VERSION;
 
 /***/ }),
 
-/***/ 2287:
+/***/ 7477:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
@@ -36576,12 +36602,12 @@ __nccwpck_require__.d(__webpack_exports__, {
   restEndpointMethods: () => (/* binding */ restEndpointMethods)
 });
 
-;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@17.0.0_@octokit+core@7.0.6/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/version.js
+;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoi_88f1cfdccbcd12f9bd89a662a3d08bce/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/version.js
 const VERSION = "17.0.0";
 
 //# sourceMappingURL=version.js.map
 
-;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@17.0.0_@octokit+core@7.0.6/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/generated/endpoints.js
+;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoi_88f1cfdccbcd12f9bd89a662a3d08bce/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/generated/endpoints.js
 const Endpoints = {
   actions: {
     addCustomLabelsToSelfHostedRunnerForOrg: [
@@ -38875,7 +38901,7 @@ var endpoints_default = Endpoints;
 
 //# sourceMappingURL=endpoints.js.map
 
-;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@17.0.0_@octokit+core@7.0.6/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/endpoints-to-methods.js
+;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoi_88f1cfdccbcd12f9bd89a662a3d08bce/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/endpoints-to-methods.js
 
 const endpointMethodsMap = /* @__PURE__ */ new Map();
 for (const [scope, endpoints] of Object.entries(endpoints_default)) {
@@ -39001,7 +39027,7 @@ function decorate(octokit, scope, methodName, defaults, decorations) {
 
 //# sourceMappingURL=endpoints-to-methods.js.map
 
-;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@17.0.0_@octokit+core@7.0.6/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/index.js
+;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoi_88f1cfdccbcd12f9bd89a662a3d08bce/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/index.js
 
 
 function restEndpointMethods(octokit) {
