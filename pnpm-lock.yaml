@@ -144,6 +144,30 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  validate-sbom:
+    devDependencies:
+      '@actions/core':
+        specifier: 'catalog:'
+        version: 2.0.3
+      '@actions/exec':
+        specifier: 'catalog:'
+        version: 2.0.0
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.1
+      '@vercel/ncc':
+        specifier: 'catalog:'
+        version: 0.38.4
+      common:
+        specifier: workspace:*
+        version: link:../common
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   verify-version-change:
     devDependencies:
       '@actions/core':

@@ -1,4 +1,4 @@
-import { filterPaths } from "./path-utils";
+import { filterPaths, splitPaths } from "./path-utils";
 
 describe('path utils', () => {
 
@@ -87,6 +87,33 @@ describe('path utils', () => {
             },
         ])('specific cases [%#]', ({ paths, patterns, expected }) => {
             expect(filterPaths(paths, patterns)).toEqual(expected);
+        });
+    });
+
+    describe('splitPaths', () => {
+        test.each([
+            {
+                paths: '',
+                expected: []
+            },
+            {
+                paths: 'a.cdx.json',
+                expected: ['a.cdx.json']
+            },
+            {
+                paths: 'a.cdx.json,b.cdx.json',
+                expected: ['a.cdx.json', 'b.cdx.json']
+            },
+            {
+                paths: 'a.cdx.json;b.cdx.json',
+                expected: ['a.cdx.json', 'b.cdx.json']
+            },
+            {
+                paths: 'a.cdx.json\r\nb.cdx.json\n c.cdx.json ',
+                expected: ['a.cdx.json', 'b.cdx.json', 'c.cdx.json']
+            },
+        ])('basic cases [%#]', ({ paths, expected }) => {
+            expect(splitPaths(paths)).toEqual(expected);
         });
     });
 });

@@ -3,6 +3,7 @@ packages:
   - get-changed-files
   - pr-filter
   - send-teams-notification
+  - validate-sbom
   - verify-version-change
 
 catalog:

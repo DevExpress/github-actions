@@ -2,10 +2,6 @@ name: Validate SBOM
 description: Install CycloneDX CLI and validate a CycloneDX SBOM file.
 
 inputs:
-  cyclonedx-version:
-    description: CycloneDX CLI version to install.
-    required: false
-    default: 0.32.0
   input-format:
     description: SBOM input format.
     required: false
@@ -14,61 +10,9 @@ inputs:
     description: Path to the SBOM file to validate.
     required: false
   input-files:
-    description: Newline-separated paths to SBOM files to validate.
+    description: Newline, comma, or semicolon separated paths to SBOM files to validate.
     required: false
 
 runs:
-  using: composite
-  steps:
-    - name: Install CycloneDX CLI
-      shell: bash
-      run: |
-        tool_dir="$RUNNER_TEMP/cyclonedx-cli"
-        mkdir -p "$tool_dir"
-
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          file=cyclonedx-linux-x64
-          bin=cyclonedx
-          sha256=454879e6a4a405c8a13bff49b8982adcb0596f3019b26b0811c66e4d7f0783e1
-        elif [[ "$RUNNER_OS" == "Windows" ]]; then
-          file=cyclonedx-win-x64.exe
-          bin=cyclonedx.exe
-          sha256=b1c00dbb40e628ec8c1252771871341ac4d4aaf032f832d83bd22cb2b1d258ae
-        else
-          file=cyclonedx-osx-arm64
-          bin=cyclonedx
-          sha256=83be8a9599f1dce1252208bd4d0bb15308eca0546814fb72b48b7246d35e832e
-        fi
-
-        curl -fsSL "https://github.com/CycloneDX/cyclonedx-cli/releases/download/v${{ inputs.cyclonedx-version }}/${file}" -o "$tool_dir/$bin"
-        cd "$tool_dir"
-        echo "$sha256  $bin" | sha256sum -c -
-        chmod +x "$tool_dir/$bin" || true
-        echo "$tool_dir" >> "$GITHUB_PATH"
-
-    - name: Validate SBOM
-      shell: bash
-      env:
-        INPUT_FILE: ${{ inputs.input-file }}
-        INPUT_FILES: ${{ inputs.input-files }}
-      run: |
-        input_files=()
-
-        if [[ -n "$INPUT_FILE" ]]; then
-          input_files+=("$INPUT_FILE")
-        fi
-
-        while IFS= read -r input_file; do
-          if [[ -n "$input_file" ]]; then
-            input_files+=("$input_file")
-          fi
-        done <<< "$INPUT_FILES"
-
-        if [[ "${#input_files[@]}" -eq 0 ]]; then
-          echo "Set input-file or input-files."
-          exit 1
-        fi
-
-        for input_file in "${input_files[@]}"; do
-          cyclonedx validate --fail-on-errors --input-format "${{ inputs.input-format }}" --input-file "$input_file"
-        done
+  using: node24
+  main: dist/index.js

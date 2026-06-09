@@ -32,3 +32,10 @@ function filterPathsImpl(
         }, false);
     });
 }
+
+export function splitPaths(paths: string): string[] {
+    return paths
+        .split(/[\r\n,;]+/)
+        .map(path => path.trim())
+        .filter(path => path.length > 0);
+}

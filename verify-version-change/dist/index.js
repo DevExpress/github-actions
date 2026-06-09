@@ -124,6 +124,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.filterPaths = filterPaths;
+exports.splitPaths = splitPaths;
 const core = __importStar(__nccwpck_require__(1751));
 const minimatch_1 = __nccwpck_require__(4804);
 const NEGATION = '!';
@@ -147,6 +148,12 @@ function filterPathsImpl(paths, patterns) {
                 : prevResult || match(path, pattern);
         }, false);
     });
+}
+function splitPaths(paths) {
+    return paths
+        .split(/[\r\n,;]+/)
+        .map(path => path.trim())
+        .filter(path => path.length > 0);
 }
 
 

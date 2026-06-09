@@ -260,81 +260,6 @@ async function getChangedFilesImpl(token) {
 
 /***/ }),
 
-/***/ 9144:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const fs = __importStar(__nccwpck_require__(9896));
-const core = __importStar(__nccwpck_require__(1751));
-const common_1 = __nccwpck_require__(1851);
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const pathPatterns = core.getInput(common_1.inputs.PATHS).split(';');
-            const token = core.getInput(common_1.inputs.GH_TOKEN, { required: true });
-            const output = core.getInput(common_1.inputs.OUTPUT, { required: true });
-            console.log('patterns: ' + JSON.stringify(pathPatterns, undefined, 2));
-            const changedFiles = yield (0, common_1.getChangedFiles)(token);
-            const filteredFiles = (0, common_1.filterPaths)(changedFiles, pathPatterns);
-            (0, common_1.ensureDir)(output);
-            fs.writeFileSync(output, JSON.stringify(filteredFiles.map(filename => ({ filename })), undefined, 2));
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                core.setFailed(error.message);
-            }
-        }
-    });
-}
-run();
-
-
-/***/ }),
-
 /***/ 3791:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -31890,6 +31815,187 @@ function onParserError (err) {
 module.exports = {
   WebSocket
 }
+
+
+/***/ }),
+
+/***/ 9144:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(1751));
+const exec_1 = __nccwpck_require__(6932);
+const crypto_1 = __nccwpck_require__(6982);
+const fs_1 = __nccwpck_require__(9896);
+const https_1 = __nccwpck_require__(5692);
+const os_1 = __nccwpck_require__(857);
+const path_1 = __nccwpck_require__(6928);
+const common_1 = __nccwpck_require__(1851);
+const CYCLONEDX_CLI_VERSION = '0.32.0';
+const inputs = {
+    INPUT_FILE: 'input-file',
+    INPUT_FILES: 'input-files',
+    INPUT_FORMAT: 'input-format',
+};
+const CYCLONEDX_CLI_ASSETS = {
+    Linux: {
+        file: 'cyclonedx-linux-x64',
+        bin: 'cyclonedx',
+        sha256: '454879e6a4a405c8a13bff49b8982adcb0596f3019b26b0811c66e4d7f0783e1',
+    },
+    Windows: {
+        file: 'cyclonedx-win-x64.exe',
+        bin: 'cyclonedx.exe',
+        sha256: 'b1c00dbb40e628ec8c1252771871341ac4d4aaf032f832d83bd22cb2b1d258ae',
+    },
+    macOS: {
+        file: 'cyclonedx-osx-arm64',
+        bin: 'cyclonedx',
+        sha256: '83be8a9599f1dce1252208bd4d0bb15308eca0546814fb72b48b7246d35e832e',
+    },
+};
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const inputFormat = core.getInput(inputs.INPUT_FORMAT) || 'json';
+            const inputFile = core.getInput(inputs.INPUT_FILE, { required: false });
+            const inputFiles = core.getInput(inputs.INPUT_FILES, { required: false });
+            const files = [
+                ...(0, common_1.splitPaths)(inputFile),
+                ...(0, common_1.splitPaths)(inputFiles),
+            ];
+            if (files.length === 0) {
+                throw new Error('Set input-file or input-files.');
+            }
+            const cyclonedxPath = yield installCycloneDxCli(CYCLONEDX_CLI_VERSION);
+            for (const file of files) {
+                yield validateSbom(cyclonedxPath, inputFormat, file);
+            }
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                core.setFailed(error.message);
+            }
+            else {
+                core.setFailed(String(error));
+            }
+        }
+    });
+}
+function installCycloneDxCli(version) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const runnerOs = process.env.RUNNER_OS || 'Linux';
+        const asset = CYCLONEDX_CLI_ASSETS[runnerOs] || CYCLONEDX_CLI_ASSETS.macOS;
+        const toolDir = (0, path_1.join)(process.env.RUNNER_TEMP || (0, os_1.tmpdir)(), 'cyclonedx-cli');
+        const toolPath = (0, path_1.join)(toolDir, asset.bin);
+        const downloadUrl = `https://github.com/CycloneDX/cyclonedx-cli/releases/download/v${version}/${asset.file}`;
+        (0, fs_1.mkdirSync)(toolDir, { recursive: true });
+        yield downloadFile(downloadUrl, toolPath);
+        verifySha256(toolPath, asset.sha256);
+        try {
+            (0, fs_1.chmodSync)(toolPath, 0o755);
+        }
+        catch (_a) {
+            core.debug(`Unable to chmod ${toolPath}.`);
+        }
+        return toolPath;
+    });
+}
+function validateSbom(cyclonedxPath, inputFormat, inputFile) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { exitCode, stdout, stderr } = yield (0, exec_1.getExecOutput)(cyclonedxPath, [
+            'validate',
+            '--fail-on-errors',
+            '--input-format',
+            inputFormat,
+            '--input-file',
+            inputFile,
+        ], {
+            ignoreReturnCode: true,
+        });
+        if (exitCode !== 0) {
+            throw new Error(`CycloneDX validation failed for "${inputFile}": ${stderr || stdout}`);
+        }
+    });
+}
+function downloadFile(url_1, destination_1) {
+    return __awaiter(this, arguments, void 0, function* (url, destination, redirectCount = 0) {
+        if (redirectCount > 5) {
+            throw new Error(`Too many redirects while downloading ${url}.`);
+        }
+        return new Promise((resolve, reject) => {
+            (0, https_1.get)(url, response => {
+                const statusCode = response.statusCode || 0;
+                const location = response.headers.location;
+                if ([301, 302, 303, 307, 308].includes(statusCode) && location) {
+                    response.resume();
+                    downloadFile(new URL(location, url).toString(), destination, redirectCount + 1).then(resolve, reject);
+                    return;
+                }
+                if (statusCode !== 200) {
+                    response.resume();
+                    reject(new Error(`Download failed with HTTP ${statusCode}: ${url}`));
+                    return;
+                }
+                const file = (0, fs_1.createWriteStream)(destination);
+                response.pipe(file);
+                file.on('finish', () => file.close(error => error ? reject(error) : resolve()));
+                file.on('error', reject);
+            }).on('error', reject);
+        });
+    });
+}
+function verifySha256(path, expectedSha256) {
+    const actualSha256 = (0, crypto_1.createHash)('sha256').update((0, fs_1.readFileSync)(path)).digest('hex');
+    if (actualSha256 !== expectedSha256) {
+        throw new Error(`Invalid CycloneDX CLI checksum. Expected ${expectedSha256}, got ${actualSha256}.`);
+    }
+}
+run();
 
 
 /***/ }),
