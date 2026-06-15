@@ -70,7 +70,12 @@ async function run(): Promise<void> {
 
 async function installCycloneDxCli(version: string): Promise<string> {
     const runnerOs = process.env.RUNNER_OS || 'Linux';
-    const asset = CYCLONEDX_CLI_ASSETS[runnerOs] || CYCLONEDX_CLI_ASSETS.macOS;
+    const asset = CYCLONEDX_CLI_ASSETS[runnerOs];
+
+    if (!asset) {
+        throw new Error(`Unsupported runner OS: ${runnerOs}.`);
+    }
+
     const toolDir = join(process.env.RUNNER_TEMP || tmpdir(), 'cyclonedx-cli');
     const toolPath = join(toolDir, asset.bin);
     const downloadUrl = `https://github.com/CycloneDX/cyclonedx-cli/releases/download/v${version}/${asset.file}`;

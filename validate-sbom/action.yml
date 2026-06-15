@@ -1,16 +1,16 @@
-name: Validate SBOM
-description: Install CycloneDX CLI and validate a CycloneDX SBOM file.
+name: validate-sbom
+description: Install CycloneDX CLI and validate SBOM file(s)
 
 inputs:
   input-format:
-    description: SBOM input format.
+    description: SBOM file format
     required: false
     default: json
   input-file:
-    description: Path to the SBOM file to validate.
+    description: Path to SBOM file to validate
     required: false
   input-files:
-    description: Newline, comma, or semicolon separated paths to SBOM files to validate.
+    description: Newline, comma, or semicolon separated paths to SBOM files to validate
     required: false
 
 runs:
