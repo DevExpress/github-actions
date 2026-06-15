@@ -31929,7 +31929,10 @@ function run() {
 function installCycloneDxCli(version) {
     return __awaiter(this, void 0, void 0, function* () {
         const runnerOs = process.env.RUNNER_OS || 'Linux';
-        const asset = CYCLONEDX_CLI_ASSETS[runnerOs] || CYCLONEDX_CLI_ASSETS.macOS;
+        const asset = CYCLONEDX_CLI_ASSETS[runnerOs];
+        if (!asset) {
+            throw new Error(`Unsupported runner OS: ${runnerOs}.`);
+        }
         const toolDir = (0, path_1.join)(process.env.RUNNER_TEMP || (0, os_1.tmpdir)(), 'cyclonedx-cli');
         const toolPath = (0, path_1.join)(toolDir, asset.bin);
         const downloadUrl = `https://github.com/CycloneDX/cyclonedx-cli/releases/download/v${version}/${asset.file}`;
