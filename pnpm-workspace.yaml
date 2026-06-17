@@ -6,13 +6,16 @@ packages:
   - validate-sbom
   - verify-version-change
 
+allowBuilds:
+  unrs-resolver: true
+
 catalog:
   '@actions/core': 2.0.3
   '@actions/exec': 2.0.0
   '@actions/github': 8.0.1
-  '@types/jest': ^29.5.14
-  '@types/node': ^24.13.0
+  '@types/jest': ^30.0.0
+  '@types/node': ^25.9.3
   '@vercel/ncc': ^0.38.4
   rimraf: ^6.0.0
-  ts-jest: ^29.4.10
+  ts-jest: ^29.4.11
   typescript: ^5.8.0
