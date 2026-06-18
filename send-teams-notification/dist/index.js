@@ -2216,7 +2216,7 @@ const Context = __importStar(__nccwpck_require__(9833));
 const Utils = __importStar(__nccwpck_require__(8187));
 // octokit + plugins
 const core_1 = __nccwpck_require__(536);
-const plugin_rest_endpoint_methods_1 = __nccwpck_require__(7477);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(2287);
 const plugin_paginate_rest_1 = __nccwpck_require__(6602);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
@@ -5844,7 +5844,7 @@ var GetIntrinsic = __nccwpck_require__(4383);
 var $defineProperty = GetIntrinsic('%Object.defineProperty%', true);
 
 var hasToStringTag = __nccwpck_require__(762)();
-var hasOwn = __nccwpck_require__(8006);
+var hasOwn = __nccwpck_require__(2611);
 var $TypeError = __nccwpck_require__(8291);
 
 var toStringTag = hasToStringTag ? Symbol.toStringTag : null;
@@ -6614,7 +6614,7 @@ module.exports.wrap = wrap;
 
 /***/ }),
 
-/***/ 3501:
+/***/ 6942:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6632,8 +6632,20 @@ var crypto = __nccwpck_require__(6982);
 var mime = __nccwpck_require__(6120);
 var asynckit = __nccwpck_require__(2577);
 var setToStringTag = __nccwpck_require__(4620);
-var hasOwn = __nccwpck_require__(8006);
-var populate = __nccwpck_require__(2030);
+var hasOwn = __nccwpck_require__(2611);
+var populate = __nccwpck_require__(8419);
+
+/**
+ * Escape CR, LF, and `"` in a multipart `name`/`filename` parameter, so a field
+ * name or filename can not break out of its header line to inject headers or
+ * smuggle additional parts. Matches the WHATWG HTML multipart/form-data encoding.
+ *
+ * @param {string} str - the parameter value to escape
+ * @returns {string} the escaped value
+ */
+function escapeHeaderParam(str) {
+  return String(str).replace(/\r/g, '%0D').replace(/\n/g, '%0A').replace(/"/g, '%22');
+}
 
 /**
  * Create readable "multipart/form-data" streams.
@@ -6800,7 +6812,7 @@ FormData.prototype._multiPartHeader = function (field, value, options) {
   var contents = '';
   var headers = {
     // add custom disposition as third element or keep it two elements if not
-    'Content-Disposition': ['form-data', 'name="' + field + '"'].concat(contentDisposition || []),
+    'Content-Disposition': ['form-data', 'name="' + escapeHeaderParam(field) + '"'].concat(contentDisposition || []),
     // if no content type. allow it to be empty array
     'Content-Type': [].concat(contentType || [])
   };
@@ -6854,7 +6866,7 @@ FormData.prototype._getContentDisposition = function (value, options) { // eslin
   }
 
   if (filename) {
-    return 'filename="' + filename + '"';
+    return 'filename="' + escapeHeaderParam(filename) + '"';
   }
 };
 
@@ -7116,7 +7128,7 @@ module.exports = FormData;
 
 /***/ }),
 
-/***/ 2030:
+/***/ 8419:
 /***/ ((module) => {
 
 "use strict";
@@ -7486,7 +7498,7 @@ var LEGACY_ALIASES = {
 };
 
 var bind = __nccwpck_require__(911);
-var hasOwn = __nccwpck_require__(8006);
+var hasOwn = __nccwpck_require__(2611);
 var $concat = bind.call($call, Array.prototype.concat);
 var $spliceApply = bind.call($apply, Array.prototype.splice);
 var $replace = bind.call($call, String.prototype.replace);
@@ -7828,7 +7840,7 @@ module.exports = function hasToStringTagShams() {
 
 /***/ }),
 
-/***/ 8006:
+/***/ 2611:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -37419,7 +37431,7 @@ function qstring(str) {
 /*! Axios v1.16.1 Copyright (c) 2026 Matt Zabriskie and contributors */
 
 
-var FormData$1 = __nccwpck_require__(3501);
+var FormData$1 = __nccwpck_require__(6942);
 var crypto = __nccwpck_require__(6982);
 var url = __nccwpck_require__(7016);
 var HttpsProxyAgent = __nccwpck_require__(6722);
@@ -44625,7 +44637,7 @@ paginateRest.VERSION = VERSION;
 
 /***/ }),
 
-/***/ 7477:
+/***/ 2287:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
@@ -44638,12 +44650,12 @@ __nccwpck_require__.d(__webpack_exports__, {
   restEndpointMethods: () => (/* binding */ restEndpointMethods)
 });
 
-;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoi_88f1cfdccbcd12f9bd89a662a3d08bce/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/version.js
+;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@17.0.0_@octokit+core@7.0.6/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/version.js
 const VERSION = "17.0.0";
 
 //# sourceMappingURL=version.js.map
 
-;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoi_88f1cfdccbcd12f9bd89a662a3d08bce/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/generated/endpoints.js
+;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@17.0.0_@octokit+core@7.0.6/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/generated/endpoints.js
 const Endpoints = {
   actions: {
     addCustomLabelsToSelfHostedRunnerForOrg: [
@@ -46937,7 +46949,7 @@ var endpoints_default = Endpoints;
 
 //# sourceMappingURL=endpoints.js.map
 
-;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoi_88f1cfdccbcd12f9bd89a662a3d08bce/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/endpoints-to-methods.js
+;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@17.0.0_@octokit+core@7.0.6/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/endpoints-to-methods.js
 
 const endpointMethodsMap = /* @__PURE__ */ new Map();
 for (const [scope, endpoints] of Object.entries(endpoints_default)) {
@@ -47063,7 +47075,7 @@ function decorate(octokit, scope, methodName, defaults, decorations) {
 
 //# sourceMappingURL=endpoints-to-methods.js.map
 
-;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoi_88f1cfdccbcd12f9bd89a662a3d08bce/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/index.js
+;// CONCATENATED MODULE: ../node_modules/.pnpm/@octokit+plugin-rest-endpoint-methods@17.0.0_@octokit+core@7.0.6/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/index.js
 
 
 function restEndpointMethods(octokit) {
