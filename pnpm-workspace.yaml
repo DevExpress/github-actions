@@ -20,8 +20,5 @@ catalog:
   ts-jest: ^29.4.11
   typescript: ^5.9.3
 
-minimumReleaseAgeExclude:
-  - form-data@4.0.6
-
 overrides:
   js-yaml@<=4.1.1: ^4.1.2
