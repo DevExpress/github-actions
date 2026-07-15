@@ -1,0 +1,103 @@
+name: build-sbom
+description: >
+  Generates a CycloneDX SBOM for an npm package via @devexpress/sbom-toolkit, uploads it as a
+  workflow artifact, and validates it with DevExpress.Internal.NuGetSbomGenerator. Bundles its own
+  @devexpress/sbom-toolkit dependency (installed from GitHub Packages at run time), so consuming
+  repositories don't need any local tooling folder.
+
+inputs:
+  package-name:
+    description: >
+      NPM package name (optionally scoped, e.g. "@devexpress/foo") to generate the SBOM for. Must
+      match the "name" field in the target package's package.json.
+    required: true
+  target-dir:
+    description: >
+      Path, relative to the workspace root (github.workspace), to the directory containing the
+      target package's package.json / package-lock.json. Defaults to the workspace root itself.
+    required: false
+    default: '.'
+  project-type:
+    description: 'Package manager used by the target project: npm or pnpm'
+    required: false
+    default: 'npm'
+
+outputs:
+  artifact-name:
+    description: 'Name of the GitHub Actions artifact containing the validated SBOM file'
+    value: ${{ steps.artifact-info.outputs.artifact-name }}
+  file-name:
+    description: 'File name of the generated CycloneDX SBOM (relative to the artifact root)'
+    value: ${{ steps.artifact-info.outputs.file-name }}
+
+runs:
+  using: composite
+  steps:
+    - name: Determine artifact info
+      id: artifact-info
+      shell: pwsh
+      run: |
+        $pkg = "${{ inputs.package-name }}"
+        if ($pkg -match '^@([^/]+)/(.+)$') {
+          # Mirrors dx-make-sbom's own output naming for scoped packages: strips the leading
+          # '@' from the scope and joins it with the package name using a hyphen.
+          $fileBase = "$($matches[1])-$($matches[2])"
+        } else {
+          $fileBase = $pkg
+        }
+        $outputDir = Join-Path "${{ github.action_path }}" 'sbom-output'
+        $filePath = Join-Path $outputDir "$fileBase.cdx.json"
+        echo "artifact-name=$fileBase-sbom" >> $env:GITHUB_OUTPUT
+        echo "file-name=$fileBase.cdx.json" >> $env:GITHUB_OUTPUT
+        echo "output-dir=$outputDir" >> $env:GITHUB_OUTPUT
+        echo "file-path=$filePath" >> $env:GITHUB_OUTPUT
+
+    - name: Install SBOM toolkit
+      shell: pwsh
+      working-directory: ${{ github.action_path }}
+      env:
+        NODE_AUTH_TOKEN: ${{ github.token }}
+      run: npm ci --no-fund --progress=false
+
+    - name: Generate SBOM
+      shell: pwsh
+      working-directory: ${{ github.action_path }}
+      run: |
+        $targetDir = Join-Path "${{ github.workspace }}" "${{ inputs.target-dir }}"
+        $outputDir = "${{ steps.artifact-info.outputs.output-dir }}"
+        if (Test-Path $outputDir) { Remove-Item -Recurse -Force $outputDir }
+        npx dx-make-sbom $targetDir $outputDir "${{ inputs.package-name }}" --${{ inputs.project-type }}
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+    - name: Upload SBOM artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.artifact-info.outputs.artifact-name }}
+        path: ${{ steps.artifact-info.outputs.file-path }}
+        if-no-files-found: error
+        retention-days: 14
+
+    - name: Summarize SBOM
+      shell: pwsh
+      run: |
+        $sbom = Get-Content "${{ steps.artifact-info.outputs.file-path }}" -Raw | ConvertFrom-Json
+        @"
+        ### 📦 SBOM Summary
+
+        | Field | Value |
+        | --- | --- |
+        | Name | $($sbom.metadata.component.name) |
+        | Version | $($sbom.metadata.component.version) |
+        | PURL | $($sbom.metadata.component.purl) |
+        | Spec version | $($sbom.specVersion) |
+        | Components | $($sbom.components.Count) |
+        | Dependencies | $($sbom.dependencies.Count) |
+        "@ >> $env:GITHUB_STEP_SUMMARY
+
+    - name: Install NuGetSbomGenerator
+      shell: pwsh
+      run: installtool DevExpress.Internal.NuGetSbomGenerator
+
+    - name: Validate SBOM
+      shell: pwsh
+      run: NuGetSbomGenerator validate="${{ steps.artifact-info.outputs.file-path }}"
