@@ -95,7 +95,12 @@ runs:
           Write-Error "Unsupported project-type '$projectType'. Allowed values: npm, pnpm."
           exit 1
         }
-        $targetDir = Join-Path $env:GITHUB_WORKSPACE $env:TARGET_DIR_INPUT
+        $targetDir = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE $env:TARGET_DIR_INPUT)).TrimEnd('\', '/')
+        $workspace = [System.IO.Path]::GetFullPath($env:GITHUB_WORKSPACE).TrimEnd('\', '/')
+        if ($targetDir -ne $workspace -and -not $targetDir.StartsWith("$workspace\", [System.StringComparison]::OrdinalIgnoreCase)) {
+          Write-Error "target-dir '$env:TARGET_DIR_INPUT' resolves to '$targetDir', which is outside the workspace '$workspace'. target-dir must stay within the checked-out repository."
+          exit 1
+        }
         $outputDir = $env:OUTPUT_DIR
         if (Test-Path $outputDir) { Remove-Item -Recurse -Force $outputDir }
         npm run make-sbom -- "$targetDir" "$outputDir" "$env:PACKAGE_NAME" "--$projectType"
