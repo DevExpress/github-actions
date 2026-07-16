@@ -9,7 +9,10 @@ description: >
   the "Install SBOM toolkit" step fails with a 401 error. Must run on DevExpress's internal
   self-hosted "farm" runner pool (runs-on: farm): the "Install NuGetSbomGenerator" step relies on
   the farm-provided "installtool" CLI to fetch DevExpress.Internal.NuGetSbomGenerator from an
-  internal-network-only feed, which GitHub-hosted (or other non-farm) runners cannot reach.
+  internal-network-only feed, which GitHub-hosted (or other non-farm) runners cannot reach. Also
+  requires Node.js to already be set up on PATH before this action runs (e.g. via a preceding
+  actions/setup-node step) — Node.js 24 is recommended; the bundled toolkit's dependency tree
+  requires at least Node.js 20.19, 22.12, or 23.
 
 inputs:
   package-name:
@@ -79,7 +82,18 @@ runs:
       working-directory: ${{ github.action_path }}
       env:
         NODE_AUTH_TOKEN: ${{ github.token }}
-      run: npm ci --no-fund --progress=false
+      run: |
+        $current = [Version]((node -v).TrimStart('v'))
+        $supported = (
+          ($current.Major -eq 20 -and $current -ge [Version]'20.19.0') -or
+          ($current.Major -eq 22 -and $current -ge [Version]'22.12.0') -or
+          ($current.Major -ge 23)
+        )
+        if (-not $supported) {
+          Write-Error "Node.js 20.19+, 22.12+, or 23+ is required for @devexpress/sbom-toolkit (current: $current). Add an actions/setup-node step with an appropriate node-version before calling this action."
+          exit 1
+        }
+        npm ci --no-fund --progress=false
 
     - name: Generate SBOM
       shell: pwsh
