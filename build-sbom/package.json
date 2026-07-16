@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Isolated tooling used by the build-sbom composite action to generate CycloneDX SBOMs",
+  "scripts": {
+    "make-sbom": "dx-make-sbom"
+  },
   "devDependencies": {
     "@devexpress/sbom-toolkit": "0.11.2"
   }
