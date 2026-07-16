@@ -47,13 +47,13 @@ runs:
         PROJECT_TYPE: ${{ inputs.project-type }}
       run: |
         $pkg = $env:PACKAGE_NAME
-        if ($pkg -notmatch '^@?[a-zA-Z0-9][a-zA-Z0-9._-]*(?:/[a-zA-Z0-9][a-zA-Z0-9._-]*)?$') {
-          Write-Error "Invalid package-name input: '$pkg'."
+        if ($pkg -cnotmatch '^@?[a-z0-9][a-z0-9._-]*(?:/[a-z0-9][a-z0-9._-]*)?$') {
+          Write-Error "Invalid package-name input: '$pkg'. NPM package names must be lowercase."
           exit 1
         }
 
         $projectType = $env:PROJECT_TYPE
-        if ($projectType -ne 'npm' -and $projectType -ne 'pnpm') {
+        if ($projectType -cne 'npm' -and $projectType -cne 'pnpm') {
           Write-Error "Unsupported project-type '$projectType'. Allowed values: npm, pnpm."
           exit 1
         }
@@ -91,7 +91,7 @@ runs:
         OUTPUT_DIR: ${{ steps.artifact-info.outputs.output-dir }}
       run: |
         $projectType = $env:PROJECT_TYPE
-        if ($projectType -ne 'npm' -and $projectType -ne 'pnpm') {
+        if ($projectType -cne 'npm' -and $projectType -cne 'pnpm') {
           Write-Error "Unsupported project-type '$projectType'. Allowed values: npm, pnpm."
           exit 1
         }
