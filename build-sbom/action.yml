@@ -3,7 +3,10 @@ description: >
   Generates a CycloneDX SBOM for an npm package via @devexpress/sbom-toolkit, uploads it as a
   workflow artifact, and validates it with DevExpress.Internal.NuGetSbomGenerator. Bundles its own
   @devexpress/sbom-toolkit dependency (installed from GitHub Packages at run time), so consuming
-  repositories don't need any local tooling folder.
+  repositories don't need any local tooling folder. Requires the calling job's GITHUB_TOKEN to have
+  the "packages: read" permission (add "permissions: packages: read" to the workflow/job), since
+  the bundled dependency is installed from GitHub Packages using ${{ github.token }} — without it,
+  the "Install SBOM toolkit" step fails with a 401 error.
 
 inputs:
   package-name:
@@ -95,14 +98,6 @@ runs:
         npm run make-sbom -- "$targetDir" "$outputDir" "$env:PACKAGE_NAME" "--$projectType"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-    - name: Upload SBOM artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.artifact-info.outputs.artifact-name }}
-        path: ${{ steps.artifact-info.outputs.file-path }}
-        if-no-files-found: error
-        retention-days: 14
-
     - name: Summarize SBOM
       shell: pwsh
       env:
@@ -131,3 +126,11 @@ runs:
       env:
         FILE_PATH: ${{ steps.artifact-info.outputs.file-path }}
       run: NuGetSbomGenerator validate="$env:FILE_PATH"
+
+    - name: Upload SBOM artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.artifact-info.outputs.artifact-name }}
+        path: ${{ steps.artifact-info.outputs.file-path }}
+        if-no-files-found: error
+        retention-days: 14
