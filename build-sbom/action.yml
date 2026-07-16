@@ -6,7 +6,10 @@ description: >
   repositories don't need any local tooling folder. Requires the calling job's GITHUB_TOKEN to have
   the "packages: read" permission (add "permissions: packages: read" to the workflow/job), since
   the bundled dependency is installed from GitHub Packages using ${{ github.token }} — without it,
-  the "Install SBOM toolkit" step fails with a 401 error.
+  the "Install SBOM toolkit" step fails with a 401 error. Must run on DevExpress's internal
+  self-hosted "farm" runner pool (runs-on: farm): the "Install NuGetSbomGenerator" step relies on
+  the farm-provided "installtool" CLI to fetch DevExpress.Internal.NuGetSbomGenerator from an
+  internal-network-only feed, which GitHub-hosted (or other non-farm) runners cannot reach.
 
 inputs:
   package-name:
@@ -119,7 +122,12 @@ runs:
 
     - name: Install NuGetSbomGenerator
       shell: pwsh
-      run: installtool DevExpress.Internal.NuGetSbomGenerator
+      run: |
+        if (-not (Get-Command installtool -ErrorAction SilentlyContinue)) {
+          Write-Error "'installtool' was not found. This action must run on DevExpress's internal 'farm' self-hosted runner pool (set 'runs-on: farm' on the calling job) — DevExpress.Internal.NuGetSbomGenerator is fetched from an internal-network-only feed that other runners cannot reach."
+          exit 1
+        }
+        installtool DevExpress.Internal.NuGetSbomGenerator
 
     - name: Validate SBOM
       shell: pwsh
