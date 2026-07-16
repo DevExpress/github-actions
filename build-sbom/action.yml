@@ -36,8 +36,22 @@ runs:
     - name: Determine artifact info
       id: artifact-info
       shell: pwsh
+      env:
+        PACKAGE_NAME: ${{ inputs.package-name }}
+        PROJECT_TYPE: ${{ inputs.project-type }}
       run: |
-        $pkg = "${{ inputs.package-name }}"
+        $pkg = $env:PACKAGE_NAME
+        if ($pkg -notmatch '^@?[a-zA-Z0-9][a-zA-Z0-9._-]*(?:/[a-zA-Z0-9][a-zA-Z0-9._-]*)?$') {
+          Write-Error "Invalid package-name input: '$pkg'."
+          exit 1
+        }
+
+        $projectType = $env:PROJECT_TYPE
+        if ($projectType -ne 'npm' -and $projectType -ne 'pnpm') {
+          Write-Error "Unsupported project-type '$projectType'. Allowed values: npm, pnpm."
+          exit 1
+        }
+
         if ($pkg -match '^@([^/]+)/(.+)$') {
           # Mirrors dx-make-sbom's own output naming for scoped packages: strips the leading
           # '@' from the scope and joins it with the package name using a hyphen.
@@ -45,12 +59,14 @@ runs:
         } else {
           $fileBase = $pkg
         }
-        $outputDir = Join-Path "${{ github.action_path }}" 'sbom-output'
+
+        $outputDir = Join-Path $env:RUNNER_TEMP "build-sbom-$([Guid]::NewGuid().ToString('N'))"
         $filePath = Join-Path $outputDir "$fileBase.cdx.json"
-        echo "artifact-name=$fileBase-sbom" >> $env:GITHUB_OUTPUT
-        echo "file-name=$fileBase.cdx.json" >> $env:GITHUB_OUTPUT
-        echo "output-dir=$outputDir" >> $env:GITHUB_OUTPUT
-        echo "file-path=$filePath" >> $env:GITHUB_OUTPUT
+
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "artifact-name=$fileBase-sbom"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "file-name=$fileBase.cdx.json"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "output-dir=$outputDir"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "file-path=$filePath"
 
     - name: Install SBOM toolkit
       shell: pwsh
@@ -62,11 +78,21 @@ runs:
     - name: Generate SBOM
       shell: pwsh
       working-directory: ${{ github.action_path }}
+      env:
+        PACKAGE_NAME: ${{ inputs.package-name }}
+        TARGET_DIR_INPUT: ${{ inputs.target-dir }}
+        PROJECT_TYPE: ${{ inputs.project-type }}
+        OUTPUT_DIR: ${{ steps.artifact-info.outputs.output-dir }}
       run: |
-        $targetDir = Join-Path "${{ github.workspace }}" "${{ inputs.target-dir }}"
-        $outputDir = "${{ steps.artifact-info.outputs.output-dir }}"
+        $projectType = $env:PROJECT_TYPE
+        if ($projectType -ne 'npm' -and $projectType -ne 'pnpm') {
+          Write-Error "Unsupported project-type '$projectType'. Allowed values: npm, pnpm."
+          exit 1
+        }
+        $targetDir = Join-Path $env:GITHUB_WORKSPACE $env:TARGET_DIR_INPUT
+        $outputDir = $env:OUTPUT_DIR
         if (Test-Path $outputDir) { Remove-Item -Recurse -Force $outputDir }
-        npm run make-sbom -- $targetDir $outputDir "${{ inputs.package-name }}" --${{ inputs.project-type }}
+        npm run make-sbom -- "$targetDir" "$outputDir" "$env:PACKAGE_NAME" "--$projectType"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     - name: Upload SBOM artifact
@@ -79,8 +105,10 @@ runs:
 
     - name: Summarize SBOM
       shell: pwsh
+      env:
+        FILE_PATH: ${{ steps.artifact-info.outputs.file-path }}
       run: |
-        $sbom = Get-Content "${{ steps.artifact-info.outputs.file-path }}" -Raw | ConvertFrom-Json
+        $sbom = Get-Content $env:FILE_PATH -Raw | ConvertFrom-Json
         @"
         ### 📦 SBOM Summary
 
@@ -100,4 +128,6 @@ runs:
 
     - name: Validate SBOM
       shell: pwsh
-      run: NuGetSbomGenerator validate="${{ steps.artifact-info.outputs.file-path }}"
+      env:
+        FILE_PATH: ${{ steps.artifact-info.outputs.file-path }}
+      run: NuGetSbomGenerator validate="$env:FILE_PATH"
