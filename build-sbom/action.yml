@@ -109,9 +109,11 @@ runs:
           Write-Error "Unsupported project-type '$projectType'. Allowed values: npm, pnpm."
           exit 1
         }
-        $targetDir = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE $env:TARGET_DIR_INPUT)).TrimEnd('\', '/')
-        $workspace = [System.IO.Path]::GetFullPath($env:GITHUB_WORKSPACE).TrimEnd('\', '/')
-        if ($targetDir -ne $workspace -and -not $targetDir.StartsWith("$workspace\", [System.StringComparison]::OrdinalIgnoreCase)) {
+        $targetDir = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE $env:TARGET_DIR_INPUT))
+        $workspace = [System.IO.Path]::GetFullPath($env:GITHUB_WORKSPACE)
+        $relative = [System.IO.Path]::GetRelativePath($workspace, $targetDir)
+        $outside = [System.IO.Path]::IsPathRooted($relative) -or $relative -eq '..' -or $relative -match '^\.\.[\\/]'
+        if ($outside) {
           Write-Error "target-dir '$env:TARGET_DIR_INPUT' resolves to '$targetDir', which is outside the workspace '$workspace'. target-dir must stay within the checked-out repository."
           exit 1
         }
