@@ -20,5 +20,10 @@ catalog:
   ts-jest: ^29.4.11
   typescript: ^5.9.3
 
+minimumReleaseAgeExclude:
+  - axios@1.18.0
+  - brace-expansion@1.1.16 || 2.1.2 || 5.0.7
+  - js-yaml@4.3.0
+
 overrides:
   js-yaml@<=4.1.1: ^4.1.2
