@@ -21,13 +21,11 @@ catalog:
   typescript: ^5.9.3
 
 minimumReleaseAgeExclude:
-  - axios@1.18.0
-  - brace-expansion@1.1.16 || 2.1.2 || 5.0.7
+  - axios@1.18.1
+  - brace-expansion@5.0.8
   - js-yaml@4.3.0
 
 overrides:
   axios@>=1.0.0 <1.18.0: ^1.18.0
-  brace-expansion@<1.1.16: ^1.1.16
-  brace-expansion@>=2.0.0 <2.1.2: ^2.1.2
-  brace-expansion@>=3.0.0 <5.0.7: ^5.0.7
+  brace-expansion@<=5.0.7: ^5.0.8
   js-yaml@>=4.0.0 <4.3.0: ^4.3.0
