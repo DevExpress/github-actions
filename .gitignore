@@ -13,4 +13,13 @@ pnpm-debug.log*
 *.tgz
 .env
 
-*/lib/
+**/lib/
+
+# Published action output
+/get-changed-files/
+/pr-filter/
+/send-teams-notification/
+/validate-sbom/
+/verify-version-change/
+/install-internal-package/
+/lgtm/

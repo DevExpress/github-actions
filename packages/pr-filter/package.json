@@ -1,7 +1,7 @@
 {
-  "name": "get-changed-files",
-  "description": "GitHub action that finds all files changed in the PR",
-  "version": "0.1.0",
+  "name": "pr-filter",
+  "description": "GitHub action that checks if PR meets certain criteria",
+  "version": "1.0.0",
   "author": "Developer Express Inc.",
   "license": "MIT",
   "engines": {
@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "tsc",
-    "dist": "node ../scripts/bundle-js-action.mjs"
+    "dist": "node ../../scripts/bundle-js-action.mjs"
   },
   "devDependencies": {
     "@actions/core": "catalog:",

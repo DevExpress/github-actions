@@ -5,7 +5,7 @@ import ncc from '@vercel/ncc';
 
 const cwd = process.cwd();
 const workspaceRoot = path.resolve(import.meta.dirname, '..');
-const outDir = path.join(workspaceRoot, '.github', 'actions', path.basename(cwd));
+const outDir = path.join(workspaceRoot, path.basename(cwd));
 
 async function build() {
   await fs.rm(outDir, { recursive: true, force: true });

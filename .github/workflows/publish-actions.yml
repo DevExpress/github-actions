@@ -17,6 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      ACTION_DIRS: |
+        get-changed-files
+        pr-filter
+        send-teams-notification
+        validate-sbom
+        verify-version-change
+        install-internal-package
+        lgtm
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -42,7 +51,9 @@ jobs:
           git symbolic-ref HEAD refs/heads/release-actions
           git reset
 
-          git add -A -- .github/actions/
+          # -f: these paths are gitignored on main (they're pure build output there),
+          # but they must still be staged for the release-actions branch.
+          git add -A -f -- $ACTION_DIRS
 
           if git diff --cached --quiet; then
             echo "No changes to publish."

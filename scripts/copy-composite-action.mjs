@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const cwd = process.cwd();
 const workspaceRoot = path.resolve(import.meta.dirname, '..');
-const outDir = path.join(workspaceRoot, '.github', 'actions', path.basename(cwd));
+const outDir = path.join(workspaceRoot, path.basename(cwd));
 
 const skip = new Set(['package.json', 'node_modules']);
 

@@ -1,6 +1,6 @@
 {
-  "name": "pr-filter",
-  "description": "GitHub action that checks if PR meets certain criteria",
+  "name": "verify-version-change",
+  "description": "GitHub action that gets changed package version.",
   "version": "1.0.0",
   "author": "Developer Express Inc.",
   "license": "MIT",
@@ -11,13 +11,15 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "tsc",
-    "dist": "node ../scripts/bundle-js-action.mjs"
+    "dist": "node ../../scripts/bundle-js-action.mjs"
   },
   "devDependencies": {
     "@actions/core": "catalog:",
     "@types/node": "catalog:",
+    "@types/semver": "^7.7.1",
     "common": "workspace:*",
     "rimraf": "catalog:",
+    "semver": "^7.8.0",
     "typescript": "catalog:"
   }
 }
