@@ -9,15 +9,14 @@
   },
   "main": "lib/main.js",
   "scripts": {
-    "clean": "rimraf dist lib",
+    "clean": "rimraf lib",
     "build": "tsc",
-    "dist": "ncc build"
+    "dist": "node ../scripts/dist.mjs"
   },
   "devDependencies": {
     "@actions/core": "catalog:",
     "@actions/github": "catalog:",
     "@types/node": "catalog:",
-    "@vercel/ncc": "catalog:",
     "ms-teams-webhook": "2.0.3",
     "rimraf": "catalog:",
     "typescript": "catalog:"

@@ -1,6 +1,8 @@
 packages:
   - common
   - get-changed-files
+  - install-internal-package
+  - lgtm
   - pr-filter
   - send-teams-notification
   - validate-sbom

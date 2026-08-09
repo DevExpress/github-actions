@@ -51,6 +51,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2
+      '@vercel/ncc':
+        specifier: 'catalog:'
+        version: 0.38.4
       jest:
         specifier: ^30.4.2
         version: 30.4.2(@types/node@24.13.2)
@@ -93,9 +96,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2
-      '@vercel/ncc':
-        specifier: 'catalog:'
-        version: 0.38.4
       common:
         specifier: workspace:*
         version: link:../common
@@ -106,6 +106,10 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  install-internal-package: {}
+
+  lgtm: {}
+
   pr-filter:
     devDependencies:
       '@actions/core':
@@ -114,9 +118,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2
-      '@vercel/ncc':
-        specifier: 'catalog:'
-        version: 0.38.4
       common:
         specifier: workspace:*
         version: link:../common
@@ -138,9 +139,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2
-      '@vercel/ncc':
-        specifier: 'catalog:'
-        version: 0.38.4
       ms-teams-webhook:
         specifier: 2.0.3
         version: 2.0.3
@@ -162,9 +160,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2
-      '@vercel/ncc':
-        specifier: 'catalog:'
-        version: 0.38.4
       common:
         specifier: workspace:*
         version: link:../common
@@ -186,9 +181,6 @@ importers:
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
-      '@vercel/ncc':
-        specifier: 'catalog:'
-        version: 0.38.4
       common:
         specifier: workspace:*
         version: link:../common

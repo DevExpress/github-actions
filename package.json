@@ -17,17 +17,13 @@
   "scripts": {
     "clean": "pnpm -r run clean",
     "build": "pnpm -r run build",
-    "dist": "pnpm -r run dist",
+    "dist": "pnpm run build && pnpm -r run dist",
     "test": "jest"
   },
-  "pre-commit": [
-    "clean",
-    "build",
-    "dist"
-  ],
   "devDependencies": {
     "@types/jest": "catalog:",
     "@types/node": "catalog:",
+    "@vercel/ncc": "catalog:",
     "jest": "^30.4.2",
     "ts-jest": "catalog:"
   }

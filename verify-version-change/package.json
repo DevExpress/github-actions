@@ -9,15 +9,14 @@
   },
   "main": "lib/main.js",
   "scripts": {
-    "clean": "rimraf dist lib",
+    "clean": "rimraf lib",
     "build": "tsc",
-    "dist": "ncc build"
+    "dist": "node ../scripts/dist.mjs"
   },
   "devDependencies": {
     "@actions/core": "catalog:",
     "@types/node": "catalog:",
     "@types/semver": "^7.7.1",
-    "@vercel/ncc": "catalog:",
     "common": "workspace:*",
     "rimraf": "catalog:",
     "semver": "^7.8.0",
