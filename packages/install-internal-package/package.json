@@ -3,6 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "clean": "rimraf ../../install-internal-package",
     "dist": "node ../../scripts/copy-composite-action.mjs"
+  },
+  "devDependencies": {
+    "rimraf": "catalog:"
   }
 }

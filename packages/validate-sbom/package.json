@@ -9,7 +9,7 @@
   },
   "main": "lib/main.js",
   "scripts": {
-    "clean": "rimraf lib",
+    "clean": "rimraf lib ../../validate-sbom",
     "build": "tsc",
     "dist": "node ../../scripts/bundle-js-action.mjs"
   },

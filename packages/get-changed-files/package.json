@@ -9,7 +9,7 @@
   },
   "main": "lib/main.js",
   "scripts": {
-    "clean": "rimraf lib",
+    "clean": "rimraf lib ../../get-changed-files",
     "build": "tsc",
     "dist": "node ../../scripts/bundle-js-action.mjs"
   },

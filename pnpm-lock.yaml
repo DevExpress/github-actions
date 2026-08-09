@@ -106,9 +106,17 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  packages/install-internal-package: {}
+  packages/install-internal-package:
+    devDependencies:
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
 
-  packages/lgtm: {}
+  packages/lgtm:
+    devDependencies:
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
 
   packages/pr-filter:
     devDependencies:
