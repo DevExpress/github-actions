@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "tsc",
-    "dist": "node ../scripts/dist.mjs"
+    "dist": "node ../scripts/bundle-js-action.mjs"
   },
   "devDependencies": {
     "@actions/core": "catalog:",
