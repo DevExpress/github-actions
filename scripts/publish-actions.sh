@@ -12,7 +12,7 @@
 #   git clone --local /path/to/this/repo /tmp/publish-test
 #   cd /tmp/publish-test
 #   pnpm install && pnpm dist
-#   BRANCH=... ACTION_DIRS=... WORKFLOW_FILES=... SHA=$(git rev-parse HEAD) GIT_USER_NAME=... GIT_USER_EMAIL=... ./scripts/publish-actions.sh
+#   BRANCH=... ACTION_DIRS=... WORKFLOW_FILES=... TAGS=... SHA=$(git rev-parse HEAD) GIT_USER_NAME=... GIT_USER_EMAIL=... ./scripts/publish-actions.sh
 #
 # Or, to test uncommitted edits to this script itself, run /path/to/this/repo/scripts/publish-actions.sh instead
 #
@@ -55,3 +55,9 @@ fi
 # $SHA must already be a resolved commit hash, not a ref like "HEAD"
 git -c user.name="$GIT_USER_NAME" -c user.email="$GIT_USER_EMAIL" commit -m "publish: $(git log -1 --format=%s "$SHA")"
 git push origin "$BRANCH"
+
+for tag in $TAGS; do
+  git -c tag.gpgsign=false -c tag.forceSignAnnotated=false tag -f "$tag" HEAD
+done
+
+git push origin --force $TAGS
