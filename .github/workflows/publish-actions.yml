@@ -17,15 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      ACTION_DIRS: |
-        get-changed-files
-        pr-filter
-        send-teams-notification
-        validate-sbom
-        verify-version-change
-        install-internal-package
-        lgtm
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -46,21 +37,17 @@ jobs:
         run: pnpm dist
 
       - name: Publish to release-actions branch
-        run: |
-          git fetch origin release-actions:refs/heads/release-actions || true
-          git symbolic-ref HEAD refs/heads/release-actions
-          git reset
-
-          # -f: these paths are gitignored on main (they're pure build output there),
-          # but they must still be staged for the release-actions branch.
-          git add -A -f -- $ACTION_DIRS
-
-          if git diff --cached --quiet; then
-            echo "No changes to publish."
-            exit 0
-          fi
-
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR_ID+$GITHUB_ACTOR@users.noreply.github.com"
-          git commit -m "publish: $(git log -1 --format=%s "$GITHUB_SHA")"
-          git push origin release-actions
+        env:
+          BRANCH: release-actions
+          SHA: ${{ github.sha }}
+          GIT_USER_NAME: ${{ github.actor }}
+          GIT_USER_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+          ACTION_DIRS: |
+            get-changed-files
+            pr-filter
+            send-teams-notification
+            validate-sbom
+            verify-version-change
+            install-internal-package
+            lgtm
+        run: ./scripts/publish-actions.sh
