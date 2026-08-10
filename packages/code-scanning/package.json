@@ -1,0 +1,32 @@
+{
+  "name": "code-scanning",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Developer Express Inc.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "clean": "rimraf lib",
+    "build": "tsc",
+    "test": "tsc --noEmit -p tsconfig.test.json && jest --config ../../jest.config.js",
+    "scan:lock-files": "tsx scripts/run.ts validateLockFiles",
+    "scan:node-versions": "tsx scripts/run.ts validateNodeVersions",
+    "scan:pnpm-audit": "tsx scripts/run.ts pnpmAudit",
+    "scan": "tsx scripts/run.ts all"
+  },
+  "devDependencies": {
+    "@types/jest": "catalog:",
+    "@types/micromatch": "^4.0.9",
+    "@types/node": "catalog:",
+    "json5": "^2.2.3",
+    "micromatch": "^4.0.8",
+    "rimraf": "catalog:",
+    "ts-jest": "catalog:",
+    "tsx": "^4.19.0",
+    "typescript": "catalog:",
+    "yaml": "^2.7.0"
+  }
+}

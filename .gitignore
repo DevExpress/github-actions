@@ -23,3 +23,7 @@ pnpm-debug.log*
 /verify-version-change/
 /install-internal-package/
 /lgtm/
+/validate-lock-files/
+/validate-node-versions/
+/pnpm-audit/
+/repository-check.yml

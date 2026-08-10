@@ -50,4 +50,8 @@ jobs:
             verify-version-change
             install-internal-package
             lgtm
+            validate-lock-files
+            validate-node-versions
+            pnpm-audit
+          WORKFLOW_FILES: repository-check.yml
         run: ./scripts/publish-actions.sh
