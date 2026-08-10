@@ -36,9 +36,9 @@ jobs:
       - name: Build and place publishable artifacts
         run: pnpm dist
 
-      - name: Publish to release-actions branch
+      - name: Publish to release branch
         env:
-          BRANCH: release-actions
+          BRANCH: release
           SHA: ${{ github.sha }}
           GIT_USER_NAME: ${{ github.actor }}
           GIT_USER_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com

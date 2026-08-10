@@ -14,4 +14,4 @@ permissions:
 jobs:
   invoke:
     name: Invoke
-    uses: DevExpress/github-actions/.github/workflows/repository-check.yml@release-actions
+    uses: DevExpress/github-actions/.github/workflows/repository-check.yml@repository-check

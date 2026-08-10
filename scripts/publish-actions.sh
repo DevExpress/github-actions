@@ -16,7 +16,7 @@
 #
 # Or, to test uncommitted edits to this script itself, run /path/to/this/repo/scripts/publish-actions.sh instead
 #
-# The clone's origin is your real repo, so the push lands release-actions
+# The clone's origin is your real repo, so the push lands release
 # there, never on GitHub.
 
 set -euo pipefail
