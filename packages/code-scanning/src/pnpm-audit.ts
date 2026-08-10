@@ -315,7 +315,7 @@ function classifyPackages(
 
 function isSubdirectory(parent: string, child: string): boolean {
   const rel = path.relative(parent, child);
-  return !!rel && !rel.startsWith('..') && !rel.startsWith('/');
+  return !!rel && !rel.startsWith('..') && !path.isAbsolute(rel);
 }
 
 // #endregion

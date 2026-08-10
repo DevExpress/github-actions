@@ -56,8 +56,13 @@ fi
 git -c user.name="$GIT_USER_NAME" -c user.email="$GIT_USER_EMAIL" commit -m "publish: $(git log -1 --format=%s "$SHA")"
 git push origin "$BRANCH"
 
-for tag in $TAGS; do
-  git -c tag.gpgsign=false -c tag.forceSignAnnotated=false tag -f "$tag" HEAD
-done
-
-git push origin --force $TAGS
+# An empty $TAGS would otherwise turn `git push origin --force $TAGS` into
+# `git push origin --force` with no refspec, which defaults to force-pushing
+# the current branch -- guard on whether $TAGS actually has any entries.
+set -- $TAGS
+if [ "$#" -gt 0 ]; then
+  for tag in "$@"; do
+    git -c tag.gpgsign=false -c tag.forceSignAnnotated=false tag -f "$tag" HEAD
+  done
+  git push origin --force -- "$@"
+fi
