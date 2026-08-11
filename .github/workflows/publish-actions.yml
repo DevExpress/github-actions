@@ -15,6 +15,7 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
+    environment: release-branch
     permissions:
       contents: write
     steps:
