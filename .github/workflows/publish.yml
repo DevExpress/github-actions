@@ -1,4 +1,4 @@
-name: Publish Actions
+name: Publish
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: publish-actions
+  group: publish
 
 jobs:
   publish:
