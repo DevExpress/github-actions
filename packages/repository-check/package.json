@@ -1,0 +1,12 @@
+{
+  "name": "repository-check",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "clean": "rimraf ../../repository-check.yml",
+    "dist": "node ../../scripts/copy-workflow.mjs"
+  },
+  "devDependencies": {
+    "rimraf": "catalog:"
+  }
+}

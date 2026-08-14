@@ -1,0 +1,24 @@
+{
+  "name": "validate-sbom",
+  "description": "GitHub action that validates CycloneDX SBOM files",
+  "version": "1.0.0",
+  "author": "Developer Express Inc.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "main": "lib/main.js",
+  "scripts": {
+    "clean": "rimraf lib ../../validate-sbom",
+    "build": "tsc",
+    "dist": "node ../../scripts/bundle-js-action.mjs"
+  },
+  "devDependencies": {
+    "@actions/core": "catalog:",
+    "@actions/exec": "catalog:",
+    "@types/node": "catalog:",
+    "common": "workspace:*",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
+  }
+}

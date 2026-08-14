@@ -1,0 +1,23 @@
+{
+  "name": "validate-node-versions",
+  "description": "GitHub action to validate Node.js versions in repositories",
+  "version": "1.0.0",
+  "author": "Developer Express Inc.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "main": "lib/main.js",
+  "scripts": {
+    "clean": "rimraf lib ../../validate-node-versions",
+    "build": "tsc",
+    "dist": "node ../../scripts/bundle-js-action.mjs"
+  },
+  "devDependencies": {
+    "@actions/core": "catalog:",
+    "@types/node": "catalog:",
+    "code-scanning": "workspace:*",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
+  }
+}

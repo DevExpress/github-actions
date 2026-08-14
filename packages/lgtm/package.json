@@ -1,0 +1,12 @@
+{
+  "name": "lgtm",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "clean": "rimraf ../../lgtm",
+    "dist": "node ../../scripts/copy-composite-action.mjs"
+  },
+  "devDependencies": {
+    "rimraf": "catalog:"
+  }
+}

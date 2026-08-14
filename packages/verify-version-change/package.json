@@ -1,0 +1,25 @@
+{
+  "name": "verify-version-change",
+  "description": "GitHub action that gets changed package version.",
+  "version": "1.0.0",
+  "author": "Developer Express Inc.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "main": "lib/main.js",
+  "scripts": {
+    "clean": "rimraf lib ../../verify-version-change",
+    "build": "tsc",
+    "dist": "node ../../scripts/bundle-js-action.mjs"
+  },
+  "devDependencies": {
+    "@actions/core": "catalog:",
+    "@types/node": "catalog:",
+    "@types/semver": "^7.7.1",
+    "common": "workspace:*",
+    "rimraf": "catalog:",
+    "semver": "^7.8.0",
+    "typescript": "catalog:"
+  }
+}
