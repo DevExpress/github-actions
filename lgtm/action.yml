@@ -1,0 +1,20 @@
+name: Get LGTM alerts
+description: Get LGTM alerts
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Project info
+      shell: bash
+      run: |
+        RESPONSE=$(curl -X GET "https://lgtm.com/api/v1.0/projects/g/${{ github.repository }}" -H 'Content-Type: application/json')
+        echo "PROJECT=$RESPONSE" >> $GITHUB_ENV
+    - name: Get Latest Analysis info
+      shell: bash
+      run: |
+        RESPONSE=$(curl -X GET 'https://lgtm.com/api/v1.0/analyses/${{ fromJSON(env.PROJECT).id }}/commits/latest' -H 'Accept: application/json')
+        echo "ANALYSIS=$RESPONSE" >> $GITHUB_ENV
+    - name: Get SARIF
+      shell: bash
+      run: |
+        curl -X GET "https://lgtm.com/api/v1.0/analyses/${{ fromJSON(env.ANALYSIS).id }}/alerts" -H 'Accept: application/sarif+json' >> lgtm.sarif

@@ -1,0 +1,66 @@
+name: install-internal-package
+description: Installs internal devextreme and devextreme-dist packages
+
+inputs:
+  install-dist:
+    description: true to install the internal devextreme and devextreme-dist packages; false to install the internal devextreme package only
+    required: false
+    default: false
+  working-directory:
+    description: path to the directory where the target package.json is located
+    required: false
+    default: './'
+
+runs:
+  using: composite
+  steps:
+    - name: Authenticate to GitHub Packages
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm set //npm.pkg.github.com/:_authToken="${{ github.token }}"
+
+    - name: Determine DevExtreme Version
+      id: devextreme_version
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: echo "version=$(npm pkg get dependencies.devextreme --workspaces=false | tr -d '"')" >> $GITHUB_OUTPUT
+
+    - name: Download Internal devextreme Package
+      id: download_devextreme
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        npm pack @devexpress/devextreme-internal@${{ steps.devextreme_version.outputs.version }} --registry https://npm.pkg.github.com
+        echo "packageFile=$(find . -maxdepth 1 -name 'devexpress-devextreme-internal-*.tgz' -print -quit)" >> $GITHUB_OUTPUT
+
+    - name: Check if DevExtreme File is Downloaded
+      if: steps.download_devextreme.outputs.packageFile == ''
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: exit 1
+
+    - name: Install Internal devextreme Package
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: node "$GITHUB_ACTION_PATH/replace-package.js" devextreme "${{ steps.download_devextreme.outputs.packageFile }}"
+
+    - name: Download Internal devextreme-dist Package
+      if: inputs.install-dist == 'true'
+      id: download_devextreme_dist
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        npm pack @devexpress/devextreme-dist-internal@${{ steps.devextreme_version.outputs.version }} --registry https://npm.pkg.github.com
+        echo "packageFile=$(find . -maxdepth 1 -name 'devexpress-devextreme-dist-internal-*.tgz' -print -quit)" >> $GITHUB_OUTPUT
+
+    - name: Check if DevExtreme-Dist File is Downloaded
+      if: inputs.install-dist == 'true' && steps.download_devextreme_dist.outputs.packageFile == ''
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: exit 1
+
+    - name: Install Internal devextreme-dist Package
+      if: inputs.install-dist == 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: node "$GITHUB_ACTION_PATH/replace-package.js" devextreme-dist "${{ steps.download_devextreme_dist.outputs.packageFile }}"

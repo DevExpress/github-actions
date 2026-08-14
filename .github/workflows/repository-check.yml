@@ -1,0 +1,52 @@
+name: Repository Check
+
+on:
+  workflow_call:
+    inputs:
+      config:
+        type: string
+        description: 'JSON5 configuration object (e.g. { ignoredAdvisories: ["GHSA-..."] })'
+        required: false
+        default: '{}'
+
+jobs:
+  repo-check:
+    name: Repository Check
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Validate lock files
+        uses: DevExpress/github-actions/validate-lock-files@repository-check
+        with:
+          target: .
+          artifacts: artifacts
+
+      - name: Validate Node versions
+        uses: DevExpress/github-actions/validate-node-versions@repository-check
+        with:
+          target: .
+          artifacts: artifacts
+
+      - name: Check pnpm audit
+        uses: DevExpress/github-actions/pnpm-audit@repository-check
+        with:
+          target: .
+          artifacts: artifacts
+          config: ${{ inputs.config }}
+
+      - name: Upload validation results
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-check
+          path: artifacts/*.json
+          if-no-files-found: error

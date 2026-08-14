@@ -1,0 +1,25 @@
+name: get-changed-files
+description: Filters the list of files changed in a PR with path globs and saves the list to file
+
+inputs:
+
+  gh-token:
+    description: GitHub access token (GITHUB_TOKEN)
+    required: true
+
+  paths:
+    description: Semicolon separated globs
+    required: false
+
+  output:
+    description: Output file path
+    required: true
+
+
+runs:
+  using: node24
+  main: dist/index.js
+
+outputs:
+  result:
+    description: A file with the list of files in JSON format
