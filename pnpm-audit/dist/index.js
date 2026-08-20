@@ -38149,10 +38149,10 @@ const micromatch = __importStar(__nccwpck_require__(9555));
 const file_system_1 = __nccwpck_require__(7026);
 const shared_types_1 = __nccwpck_require__(1181);
 const LOCK_FILES = [
-    'package-lock.json', // npm
-    'yarn.lock', // yarn
-    'pnpm-lock.yaml', // pnpm
-    'bun.lockb', // bun
+    'package-lock.json',
+    'yarn.lock',
+    'pnpm-lock.yaml',
+    'bun.lockb',
 ];
 async function validateLockFiles({ targetPath, artifactsPath, }) {
     const fileSystem = new file_system_1.NodeFileSystem();
