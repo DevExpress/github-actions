@@ -10,10 +10,10 @@ import {
 } from './shared-types';
 
 const LOCK_FILES = [
-  'package-lock.json', // npm
-  'yarn.lock', // yarn
-  'pnpm-lock.yaml', // pnpm
-  'bun.lockb', // bun
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml',
+  'bun.lockb',
 ] as const;
 
 interface WorkspaceInfo {
