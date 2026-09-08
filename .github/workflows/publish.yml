@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      message:
+        type: string
+        description: 'Overrides the publish commit subject. A publish is a snapshot, so when several commits piled up since the last run the newest subject alone undersells them.'
+        required: false
+        default: ''
 
 permissions: {}
 
@@ -17,10 +23,15 @@ jobs:
     runs-on: ubuntu-slim
     environment: release-branch
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          # GITHUB_TOKEN cannot create or update files under .github/workflows --
+          # the `workflows` permission is not grantable to it. The release branch
+          # carries repository-check.yml, so the push needs a PAT that has it.
+          token: ${{ secrets.RELEASE_BRANCH_TOKEN }}
 
       - name: Setup PNPM
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
@@ -41,6 +52,7 @@ jobs:
         env:
           BRANCH: release
           SHA: ${{ github.sha }}
+          MESSAGE: ${{ inputs.message }}
           GIT_USER_NAME: ${{ github.actor }}
           GIT_USER_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
           WORKFLOW_FILES: repository-check.yml
