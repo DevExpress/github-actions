@@ -8,6 +8,11 @@ on:
         description: 'JSON5 configuration object (e.g. { ignoredAdvisories: ["GHSA-..."] })'
         required: false
         default: '{}'
+      extraDetails:
+        type: string
+        description: 'Markdown the repository contributes about itself. Published as extra-details.md in the health-check artifact, which the repository monitor appends to the repository issue body.'
+        required: false
+        default: ''
 
 jobs:
   repo-check:
@@ -15,15 +20,15 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: '.node-version'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Validate lock files
         uses: DevExpress/github-actions/validate-lock-files@repository-check
@@ -44,9 +49,17 @@ jobs:
           artifacts: artifacts
           config: ${{ inputs.config }}
 
+      - name: Add external details
+        if: ${{ inputs.extraDetails != '' }}
+        env:
+          EXTRA_DETAILS: ${{ inputs.extraDetails }}
+        run: printf '%s\n' "$EXTRA_DETAILS" > artifacts/extra-details.md
+
       - name: Upload validation results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: health-check
-          path: artifacts/*.json
+          path: |
+            artifacts/*.json
+            artifacts/*.md
           if-no-files-found: error
