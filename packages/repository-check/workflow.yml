@@ -8,6 +8,11 @@ on:
         description: 'JSON5 configuration object (e.g. { ignoredAdvisories: ["GHSA-..."] })'
         required: false
         default: '{}'
+      extraDetails:
+        type: string
+        description: 'Markdown the repository contributes about itself. Published as extra-details.md in the health-check artifact, which the repository monitor appends to the repository issue body.'
+        required: false
+        default: ''
 
 jobs:
   repo-check:
@@ -44,9 +49,17 @@ jobs:
           artifacts: artifacts
           config: ${{ inputs.config }}
 
+      - name: Add external details
+        if: ${{ inputs.extraDetails != '' }}
+        env:
+          EXTRA_DETAILS: ${{ inputs.extraDetails }}
+        run: printf '%s\n' "$EXTRA_DETAILS" > artifacts/extra-details.md
+
       - name: Upload validation results
         uses: actions/upload-artifact@v4
         with:
           name: health-check
-          path: artifacts/*.json
+          path: |
+            artifacts/*.json
+            artifacts/*.md
           if-no-files-found: error
