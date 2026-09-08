@@ -53,7 +53,7 @@ if git diff --cached --quiet; then
 fi
 
 # $SHA must already be a resolved commit hash, not a ref like "HEAD"
-git -c user.name="$GIT_USER_NAME" -c user.email="$GIT_USER_EMAIL" commit -m "publish: $(git log -1 --format=%s "$SHA")"
+git -c user.name="$GIT_USER_NAME" -c user.email="$GIT_USER_EMAIL" commit -m "publish: ${MESSAGE:-$(git log -1 --format=%s "$SHA")}"
 git push origin "$BRANCH"
 
 # An empty $TAGS would otherwise turn `git push origin --force $TAGS` into
