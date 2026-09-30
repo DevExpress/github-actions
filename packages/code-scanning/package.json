@@ -19,14 +19,14 @@
   },
   "devDependencies": {
     "@types/jest": "catalog:",
-    "@types/micromatch": "^4.0.9",
+    "@types/micromatch": "^4.0.10",
     "@types/node": "catalog:",
     "json5": "^2.2.3",
     "micromatch": "^4.0.8",
     "rimraf": "catalog:",
     "ts-jest": "catalog:",
-    "tsx": "^4.19.0",
+    "tsx": "^4.23.11",
     "typescript": "catalog:",
-    "yaml": "^2.7.0"
+    "yaml": "^2.9.0"
   }
 }
