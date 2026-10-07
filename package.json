@@ -18,7 +18,7 @@
     "clean": "pnpm -r run clean",
     "build": "pnpm -r run build",
     "dist": "pnpm run build && pnpm -r run dist",
-    "test": "vitest run"
+    "test": "pnpm -r test"
   },
   "devDependencies": {
     "@types/node": "catalog:",
