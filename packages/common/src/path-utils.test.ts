@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { filterPaths, splitPaths } from "./path-utils";
 
 describe('path utils', () => {

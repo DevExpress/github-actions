@@ -3,8 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "module": "preserve",
-    "moduleResolution": "bundler",
-    "types": ["node"]
+    "moduleResolution": "bundler"
   },
   "include": ["src/**/*.test.ts"]
 }

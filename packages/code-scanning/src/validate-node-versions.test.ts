@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { validateNodeVersions } from './validate-node-versions';
 import { FileSystemMock } from './file-system';
 
