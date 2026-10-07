@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as yaml from 'yaml';
-import * as micromatch from 'micromatch';
+import * as picomatch from 'picomatch';
 
 import { FileSystem, NodeFileSystem } from './file-system';
 import {
@@ -133,7 +133,7 @@ export async function discoverLockFiles(
     if (!relativePath || relativePath === '.') return false;
 
     const packageDir = path.dirname(relativePath);
-    return micromatch.isMatch(packageDir, workspace.patterns, { dot: true, matchBase: false });
+    return picomatch.isMatch(packageDir, workspace.patterns, { dot: true, matchBase: false, posix: true });
   }
 
   // Find lock files in current or parent directories up to rootPath

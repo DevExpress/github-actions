@@ -1,13 +1,14 @@
 import * as core from '@actions/core'
-import { MinimatchOptions, minimatch } from "minimatch";
+import * as picomatch from 'picomatch';
 
 const NEGATION = '!';
-const matchOptions: MinimatchOptions = {
+const matchOptions: picomatch.PicomatchOptions = {
     dot: true,
+    posix: true,
 }
 
 function match(path: string, pattern: string): boolean {
-    return minimatch(path.replace(/\\/g, '/'), pattern, matchOptions);
+    return picomatch.isMatch(path.replace(/\\/g, '/'), pattern, matchOptions);
 }
 
 export function filterPaths(
