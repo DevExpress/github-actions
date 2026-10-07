@@ -18,13 +18,11 @@
     "clean": "pnpm -r run clean",
     "build": "pnpm -r run build",
     "dist": "pnpm run build && pnpm -r run dist",
-    "test": "jest"
+    "test": "vitest run"
   },
   "devDependencies": {
-    "@types/jest": "catalog:",
     "@types/node": "catalog:",
     "@vercel/ncc": "catalog:",
-    "jest": "^30.4.2",
-    "ts-jest": "catalog:"
+    "vitest": "catalog:"
   }
 }

@@ -11,22 +11,21 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "tsc",
-    "test": "tsc --noEmit -p tsconfig.test.json && jest --config ../../jest.config.js",
+    "test": "tsc --noEmit -p tsconfig.test.json && vitest run --config ../../vitest.config.mts --root .",
     "scan:lock-files": "tsx scripts/run.ts validateLockFiles",
     "scan:node-versions": "tsx scripts/run.ts validateNodeVersions",
     "scan:pnpm-audit": "tsx scripts/run.ts pnpmAudit",
     "scan": "tsx scripts/run.ts all"
   },
   "devDependencies": {
-    "@types/jest": "catalog:",
     "@types/node": "catalog:",
     "@types/picomatch": "^4.0.3",
     "json5": "^2.2.3",
     "picomatch": "^4.0.7",
     "rimraf": "catalog:",
-    "ts-jest": "catalog:",
     "tsx": "^4.23.11",
     "typescript": "catalog:",
+    "vitest": "catalog:",
     "yaml": "^2.9.0"
   }
 }

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { discoverLockFiles } from './validate-lock-files';
 import { FileSystemMock } from './file-system';
 

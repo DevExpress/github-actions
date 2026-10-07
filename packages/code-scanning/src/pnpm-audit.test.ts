@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { filterIgnoredAdvisories } from './pnpm-audit';
 import { AuditSeverity, type AuditVulnerability, type PackageAuditResult } from './shared-types';
 
