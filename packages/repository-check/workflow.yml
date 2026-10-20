@@ -29,6 +29,11 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          # Only a launcher for `pnpm audit`: pnpm switches to the version pinned by each audited package.
+          # A non-existent package_json_file keeps the repository's packageManager from conflicting with it.
+          version: 12.14.0
+          package_json_file: .no-package.json
 
       - name: Validate lock files
         uses: DevExpress/github-actions/validate-lock-files@repository-check
