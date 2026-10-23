@@ -11,7 +11,7 @@
 #
 #   git clone --local /path/to/this/repo /tmp/publish-test
 #   cd /tmp/publish-test
-#   pnpm install && pnpm dist
+#   pnpm install --frozen-lockfile && pnpm dist
 #   BRANCH=... ACTION_DIRS=... WORKFLOW_FILES=... TAGS=... SHA=$(git rev-parse HEAD) GIT_USER_NAME=... GIT_USER_EMAIL=... ./scripts/publish-actions.sh
 #
 # Or, to test uncommitted edits to this script itself, run /path/to/this/repo/scripts/publish-actions.sh instead
