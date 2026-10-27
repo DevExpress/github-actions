@@ -9,6 +9,7 @@ import {
   type PackageAuditResult,
   type DepAuditReport,
 } from '../shared-types';
+import { detectBunWorkspaces, parseBunAuditOutput } from './bun';
 import type { PackageManager, WorkspaceInfo } from './common';
 import { detectNpmWorkspaces, parseNpmAuditOutput } from './npm';
 import { detectPnpmWorkspaces, parsePnpmAuditOutput } from './pnpm';
@@ -162,11 +163,12 @@ export async function depAudit({
     throw new Error(`Path is not a directory: ${resolvedRoot}`);
   }
 
-  console.log(`Scanning ${resolvedRoot} for pnpm/npm packages...\n`);
+  console.log(`Scanning ${resolvedRoot} for pnpm/npm/bun packages...\n`);
 
   const workspaces = [
     ...(await detectPnpmWorkspaces(resolvedRoot, fs)),
     ...(await detectNpmWorkspaces(resolvedRoot, fs)),
+    ...(await detectBunWorkspaces(resolvedRoot, fs)),
   ];
   const allPackageDirs = await findAllPackageJsonDirs(resolvedRoot, fs);
 
@@ -215,7 +217,9 @@ export async function depAudit({
     } else {
       const parsed = ws.packageManager === 'npm'
         ? parseNpmAuditOutput(stdout)
-        : parsePnpmAuditOutput(stdout, stderr);
+        : ws.packageManager === 'bun'
+          ? parseBunAuditOutput(stdout, stderr)
+          : parsePnpmAuditOutput(stdout, stderr);
       if (parsed.error) {
         console.log(`  ⚠ ${parsed.error}`);
       }
