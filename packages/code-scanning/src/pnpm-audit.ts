@@ -143,15 +143,71 @@ function extractFromAdvisories(
 
 // #endregion
 
-// #region pnpm workspace detection
+// #region npm audit parsing
+
+interface NpmAuditVia {
+  source: number;
+  name: string;
+  title: string;
+  url: string;
+  severity: string;
+  range: string;
+}
+
+interface NpmAuditEntry {
+  via: (NpmAuditVia | string)[];
+  fixAvailable: unknown;
+}
+
+export function parseNpmAuditOutput(
+  stdout: string,
+): { vulnerabilities: AuditVulnerability[]; error?: string } {
+  const root = tryParseJson(stdout.trim());
+  if (!root) {
+    return { vulnerabilities: [], error: stdout.trim() || 'Invalid npm audit output format' };
+  }
+  if (root['error']) {
+    return { vulnerabilities: [], error: JSON.stringify(root['error']) };
+  }
+
+  const entries = (root['vulnerabilities'] ?? {}) as Record<string, NpmAuditEntry>;
+  const result: AuditVulnerability[] = [];
+  for (const entry of Object.values(entries)) {
+    for (const via of entry.via) {
+      if (typeof via === 'string') continue;
+      result.push({
+        id: String(via.source),
+        name: via.name,
+        severity: via.severity,
+        severityLevel: parseSeverityLevel(via.severity),
+        title: via.title,
+        url: via.url,
+        vulnerableRange: via.range,
+        fixAvailable: !!entry.fixAvailable,
+      });
+    }
+  }
+  return { vulnerabilities: result };
+}
+
+// #endregion
+
+// #region workspace detection
+
+type PackageManager = 'pnpm' | 'npm';
 
 interface WorkspaceInfo {
+  packageManager: PackageManager;
   lockFileDir: string;
   memberPatterns: string[];
   memberDirs: Set<string>;
 }
 
-async function findPnpmLockFiles(rootPath: string, fs: FileSystem): Promise<string[]> {
+async function findLockFiles(
+  rootPath: string,
+  lockFileName: string,
+  fs: FileSystem,
+): Promise<string[]> {
   const results: string[] = [];
 
   async function walk(dir: string): Promise<void> {
@@ -166,7 +222,7 @@ async function findPnpmLockFiles(rootPath: string, fs: FileSystem): Promise<stri
       const full = path.join(dir, entry);
       if (await fs.isDirectory(full)) {
         await walk(full);
-      } else if (entry === 'pnpm-lock.yaml') {
+      } else if (entry === lockFileName) {
         results.push(dir);
       }
     }
@@ -242,14 +298,23 @@ async function resolveWorkspaceMembers(
 }
 
 async function detectWorkspaces(rootPath: string, fs: FileSystem): Promise<WorkspaceInfo[]> {
-  const lockFileDirs = await findPnpmLockFiles(rootPath, fs);
   const workspaces: WorkspaceInfo[] = [];
 
-  for (const dir of lockFileDirs) {
+  for (const dir of await findLockFiles(rootPath, 'pnpm-lock.yaml', fs)) {
     const workspaceYaml = path.join(dir, 'pnpm-workspace.yaml');
     const memberPatterns = await parsePnpmWorkspaceYaml(workspaceYaml, fs);
     const memberDirs = await resolveWorkspaceMembers(dir, memberPatterns, fs);
-    workspaces.push({ lockFileDir: dir, memberPatterns, memberDirs });
+    workspaces.push({ packageManager: 'pnpm', lockFileDir: dir, memberPatterns, memberDirs });
+  }
+
+  // npm workspace members live under the lock file dir, so isSubdirectory covers them
+  for (const dir of await findLockFiles(rootPath, 'package-lock.json', fs)) {
+    workspaces.push({
+      packageManager: 'npm',
+      lockFileDir: dir,
+      memberPatterns: [],
+      memberDirs: new Set([path.resolve(dir)]),
+    });
   }
 
   return workspaces;
@@ -287,12 +352,12 @@ async function findAllPackageJsonDirs(rootPath: string, fs: FileSystem): Promise
 function classifyPackages(
   packageDirs: string[],
   workspaces: WorkspaceInfo[],
-): { workspaceAuditRoots: Map<string, string[]>; strayPackageDirs: string[] } {
-  const workspaceAuditRoots = new Map<string, string[]>();
+): { workspaceAuditRoots: Map<WorkspaceInfo, string[]>; strayPackageDirs: string[] } {
+  const workspaceAuditRoots = new Map<WorkspaceInfo, string[]>();
   const strayPackageDirs: string[] = [];
 
   for (const ws of workspaces) {
-    workspaceAuditRoots.set(ws.lockFileDir, []);
+    workspaceAuditRoots.set(ws, []);
   }
 
   for (const pkgDir of packageDirs) {
@@ -300,7 +365,7 @@ function classifyPackages(
     let found = false;
     for (const ws of workspaces) {
       if (ws.memberDirs.has(resolved) || isSubdirectory(ws.lockFileDir, resolved)) {
-        workspaceAuditRoots.get(ws.lockFileDir)!.push(pkgDir);
+        workspaceAuditRoots.get(ws)!.push(pkgDir);
         found = true;
         break;
       }
@@ -320,17 +385,15 @@ function isSubdirectory(parent: string, child: string): boolean {
 
 // #endregion
 
-// #region Running pnpm audit
+// #region Running audit
 
-function getPnpmCommand(): string {
-  return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-}
-
-async function runPnpmAudit(
+async function runAudit(
+  packageManager: PackageManager,
   cwd: string,
 ): Promise<{ stdout: string; stderr: string; error?: string }> {
+  const command = process.platform === 'win32' ? `${packageManager}.cmd` : packageManager;
   try {
-    const { stdout, stderr } = await execFileAsync(getPnpmCommand(), ['audit', '--json'], {
+    const { stdout, stderr } = await execFileAsync(command, ['audit', '--json'], {
       cwd,
       maxBuffer: 50 * 1024 * 1024,
     });
@@ -344,7 +407,7 @@ async function runPnpmAudit(
         || stderrLower.includes('enoent')
         || stderrLower.includes('cannot find')
       ) {
-        return { stdout: '', stderr: '', error: 'pnpm is not installed or not found in PATH' };
+        return { stdout: '', stderr: '', error: `${packageManager} is not installed or not found in PATH` };
       }
       return { stdout: execErr.stdout ?? '', stderr: execErr.stderr ?? '' };
     }
@@ -406,7 +469,7 @@ export async function pnpmAudit({
     throw new Error(`Path is not a directory: ${resolvedRoot}`);
   }
 
-  console.log(`Scanning ${resolvedRoot} for pnpm packages...\n`);
+  console.log(`Scanning ${resolvedRoot} for pnpm/npm packages...\n`);
 
   const workspaces = await detectWorkspaces(resolvedRoot, fs);
   const allPackageDirs = await findAllPackageJsonDirs(resolvedRoot, fs);
@@ -433,14 +496,15 @@ export async function pnpmAudit({
   const totalAuditRuns = workspaceAuditRoots.size + strayPackageDirs.length;
 
   // Audit workspace roots
-  for (const [auditRoot, memberDirs] of workspaceAuditRoots) {
+  for (const [ws, memberDirs] of workspaceAuditRoots) {
     counter++;
+    const auditRoot = ws.lockFileDir;
     const relDir = path.relative(resolvedRoot, auditRoot) || '.';
     console.log(
-      `(${counter}/${totalAuditRuns}) ${relDir} (workspace root, ${memberDirs.length} packages)`,
+      `(${counter}/${totalAuditRuns}) ${relDir} (${ws.packageManager} workspace root, ${memberDirs.length} packages)`,
     );
 
-    const { stdout, stderr, error } = await runPnpmAudit(auditRoot);
+    const { stdout, stderr, error } = await runAudit(ws.packageManager, auditRoot);
 
     if (error) {
       console.log(`  ✖ ${error}`);
@@ -452,7 +516,9 @@ export async function pnpmAudit({
         isWorkspaceMember: true,
       });
     } else {
-      const parsed = parseAuditOutput(stdout, stderr);
+      const parsed = ws.packageManager === 'npm'
+        ? parseNpmAuditOutput(stdout)
+        : parseAuditOutput(stdout, stderr);
       if (parsed.error) {
         console.log(`  ⚠ ${parsed.error}`);
       }
@@ -493,7 +559,7 @@ export async function pnpmAudit({
       continue;
     }
 
-    const { stdout, stderr, error } = await runPnpmAudit(strayDir);
+    const { stdout, stderr, error } = await runAudit('pnpm', strayDir);
 
     if (error) {
       console.log(`  ✖ ${error}`);
