@@ -47,8 +47,8 @@ jobs:
           target: .
           artifacts: artifacts
 
-      - name: Check pnpm audit
-        uses: DevExpress/github-actions/pnpm-audit@repository-check
+      - name: Check dependency audit
+        uses: DevExpress/github-actions/dep-audit@repository-check
         with:
           target: .
           artifacts: artifacts

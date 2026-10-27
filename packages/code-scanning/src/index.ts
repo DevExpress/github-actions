@@ -17,10 +17,10 @@ export {
   parseRepoCheckConfig,
 } from './config';
 export {
-  pnpmAudit,
-} from './pnpm-audit';
+  depAudit,
+} from './dep-audit';
 export {
-  type PnpmAuditReport,
+  type DepAuditReport,
   type PackageAuditResult,
   type AuditVulnerability,
   AuditSeverity,

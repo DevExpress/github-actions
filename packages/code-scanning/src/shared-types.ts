@@ -39,7 +39,7 @@ export interface NodeVersionReport {
 export const NODE_VERSIONS_REPORT_FILENAME = 'node-versions-report.json';
 //#endregion
 
-//#region pnpm-audit
+//#region dep-audit
 export enum AuditSeverity {
   Info = 0,
   Low = 1,

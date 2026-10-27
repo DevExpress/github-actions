@@ -1,6 +1,6 @@
 {
-  "name": "pnpm-audit",
-  "description": "GitHub action to run pnpm audit and report vulnerabilities",
+  "name": "dep-audit",
+  "description": "GitHub action to run pnpm/npm audit and report vulnerabilities",
   "version": "1.0.0",
   "author": "Developer Express Inc.",
   "license": "MIT",
@@ -9,7 +9,7 @@
   },
   "main": "lib/main.js",
   "scripts": {
-    "clean": "rimraf lib ../../pnpm-audit",
+    "clean": "rimraf lib ../../dep-audit",
     "build": "tsc",
     "dist": "node ../../scripts/bundle-js-action.mjs"
   },

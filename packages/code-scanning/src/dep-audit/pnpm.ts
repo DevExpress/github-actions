@@ -37,7 +37,7 @@ function collectJsonPayloads(stdout: string, stderr: string): Record<string, unk
   return payloads;
 }
 
-export function parseAuditOutput(
+export function parsePnpmAuditOutput(
   stdout: string,
   stderr: string,
 ): ParsedAuditOutput {

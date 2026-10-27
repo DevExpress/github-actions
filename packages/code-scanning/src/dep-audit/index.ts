@@ -7,11 +7,11 @@ import {
   PNPM_AUDIT_REPORT_FILENAME,
   type AuditVulnerability,
   type PackageAuditResult,
-  type PnpmAuditReport,
+  type DepAuditReport,
 } from '../shared-types';
 import type { PackageManager, WorkspaceInfo } from './common';
 import { detectNpmWorkspaces, parseNpmAuditOutput } from './npm';
-import { detectPnpmWorkspaces, parseAuditOutput } from './pnpm';
+import { detectPnpmWorkspaces, parsePnpmAuditOutput } from './pnpm';
 
 const execFileAsync = promisify(execFile);
 
@@ -141,7 +141,7 @@ export function filterIgnoredAdvisories(
   return { processedPackages, ignoredVulnerabilities };
 }
 
-export async function pnpmAudit({
+export async function depAudit({
   targetPath,
   artifactsPath,
   fileSystem,
@@ -151,7 +151,7 @@ export async function pnpmAudit({
   artifactsPath: string;
   fileSystem?: FileSystem;
   ignoredAdvisories?: string[];
-}): Promise<PnpmAuditReport> {
+}): Promise<DepAuditReport> {
   const fs = fileSystem || new NodeFileSystem();
   const resolvedRoot = path.resolve(targetPath);
 
@@ -172,7 +172,7 @@ export async function pnpmAudit({
 
   if (allPackageDirs.length === 0) {
     console.log('No package.json files found. Nothing to audit.');
-    const report: PnpmAuditReport = {
+    const report: DepAuditReport = {
       succeeded: true,
       rootPath: resolvedRoot,
       packages: [],
@@ -214,7 +214,7 @@ export async function pnpmAudit({
     } else {
       const parsed = ws.packageManager === 'npm'
         ? parseNpmAuditOutput(stdout)
-        : parseAuditOutput(stdout, stderr);
+        : parsePnpmAuditOutput(stdout, stderr);
       if (parsed.error) {
         console.log(`  ⚠ ${parsed.error}`);
       }
@@ -244,12 +244,12 @@ export async function pnpmAudit({
 
     const hasLockFile = await fs.exists(path.join(strayDir, 'pnpm-lock.yaml'));
     if (!hasLockFile) {
-      console.log('  No pnpm-lock.yaml found. Skipping audit.');
+      console.log('  No lock file found. Skipping audit.');
       packages.push({
         directory: strayDir,
         relativeDirectory: relDir,
         vulnerabilities: [],
-        error: 'No pnpm-lock.yaml found',
+        error: 'No lock file found',
         isWorkspaceMember: false,
       });
       continue;
@@ -267,7 +267,7 @@ export async function pnpmAudit({
         isWorkspaceMember: false,
       });
     } else {
-      const parsed = parseAuditOutput(stdout, stderr);
+      const parsed = parsePnpmAuditOutput(stdout, stderr);
       if (parsed.error) {
         console.log(`  ⚠ ${parsed.error}`);
       }
@@ -305,7 +305,7 @@ export async function pnpmAudit({
   const packagesWithVulnerabilities = processedPackages.filter((p) => p.vulnerabilities.length > 0).length;
   const strayPackages = strayPackageDirs.map((d) => path.relative(resolvedRoot, d) || '.');
 
-  const report: PnpmAuditReport = {
+  const report: DepAuditReport = {
     succeeded: totalVulnerabilities === 0,
     rootPath: resolvedRoot,
     packages: processedPackages,
@@ -332,7 +332,7 @@ export async function pnpmAudit({
 
   if (strayPackages.length > 0) {
     console.log(
-      `⚠ ${strayPackages.length} stray package(s) found outside any pnpm workspace: ${strayPackages.join(', ')}`,
+      `⚠ ${strayPackages.length} stray package(s) found outside any workspace: ${strayPackages.join(', ')}`,
     );
   }
 
@@ -342,7 +342,7 @@ export async function pnpmAudit({
 }
 
 async function saveReport(
-  report: PnpmAuditReport,
+  report: DepAuditReport,
   artifactsPath: string,
   fs: FileSystem,
 ): Promise<void> {

@@ -66,7 +66,7 @@ jobs:
             lgtm
             validate-lock-files
             validate-node-versions
-            pnpm-audit
+            dep-audit
           TAGS: |
             get-changed-files
             pr-filter

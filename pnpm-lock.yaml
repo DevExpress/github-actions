@@ -108,6 +108,24 @@ importers:
         specifier: 'catalog:'
         version: 5.0.3(@types/node@24.13.2)(vite@8.3.3(@types/node@24.13.2)(esbuild@0.28.2)(tsx@4.23.11)(yaml@2.9.0))
 
+  packages/dep-audit:
+    devDependencies:
+      '@actions/core':
+        specifier: 'catalog:'
+        version: 2.0.3
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.2
+      code-scanning:
+        specifier: workspace:*
+        version: link:../code-scanning
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/get-changed-files:
     devDependencies:
       '@actions/core':
@@ -137,24 +155,6 @@ importers:
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3
-
-  packages/pnpm-audit:
-    devDependencies:
-      '@actions/core':
-        specifier: 'catalog:'
-        version: 2.0.3
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.13.2
-      code-scanning:
-        specifier: workspace:*
-        version: link:../code-scanning
-      rimraf:
-        specifier: 'catalog:'
-        version: 6.1.3
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
 
   packages/pr-filter:
     devDependencies:
