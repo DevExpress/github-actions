@@ -68,7 +68,7 @@ export interface PackageAuditResult {
   isWorkspaceMember: boolean;
 }
 
-export interface PnpmAuditReport {
+export interface DepAuditReport {
   succeeded: boolean;
   rootPath: string;
   packages: PackageAuditResult[];
@@ -79,5 +79,5 @@ export interface PnpmAuditReport {
   ignoredAdvisories?: string[];
   ignoredVulnerabilities?: AuditVulnerability[];
 }
-export const PNPM_AUDIT_REPORT_FILENAME = 'pnpm-audit-report.json';
+export const PNPM_AUDIT_REPORT_FILENAME = 'dep-audit-report.json';
 //#endregion
