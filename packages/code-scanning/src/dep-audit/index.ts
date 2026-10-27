@@ -210,6 +210,7 @@ export async function depAudit({
         vulnerabilities: [],
         error,
         isWorkspaceMember: true,
+        packageManager: ws.packageManager,
       });
     } else {
       const parsed = ws.packageManager === 'npm'
@@ -232,6 +233,7 @@ export async function depAudit({
         vulnerabilities: parsed.vulnerabilities,
         error: parsed.error,
         isWorkspaceMember: true,
+        packageManager: ws.packageManager,
       });
     }
   }

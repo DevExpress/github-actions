@@ -66,6 +66,7 @@ export interface PackageAuditResult {
   vulnerabilities: AuditVulnerability[];
   error?: string;
   isWorkspaceMember: boolean;
+  packageManager?: string;
 }
 
 export interface DepAuditReport {
