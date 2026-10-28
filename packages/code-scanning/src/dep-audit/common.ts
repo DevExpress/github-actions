@@ -25,8 +25,6 @@ export function parseSeverityLevel(severity?: string): AuditSeverity {
       return AuditSeverity.Moderate;
     case 'low':
       return AuditSeverity.Low;
-    case 'info':
-      return AuditSeverity.Info;
     default:
       return AuditSeverity.Info;
   }

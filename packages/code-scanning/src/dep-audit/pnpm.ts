@@ -1,11 +1,8 @@
-import { FileSystem } from '../file-system';
 import type { AuditVulnerability } from '../shared-types';
 import {
-  findLockFiles,
   parseSeverityLevel,
   tryParseJson,
   type ParsedAuditOutput,
-  type WorkspaceInfo,
 } from './common';
 
 // #region pnpm audit parsing
@@ -57,18 +54,6 @@ function extractFromAdvisories(
     });
   }
   return result;
-}
-
-// #endregion
-
-// #region pnpm workspace detection
-
-export async function detectPnpmWorkspaces(
-  rootPath: string,
-  fs: FileSystem,
-): Promise<WorkspaceInfo[]> {
-  const dirs = await findLockFiles(rootPath, 'pnpm-lock.yaml', fs);
-  return dirs.map((dir) => ({ packageManager: 'pnpm', lockFileDir: dir }));
 }
 
 // #endregion

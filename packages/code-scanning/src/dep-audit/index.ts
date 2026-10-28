@@ -9,12 +9,26 @@ import {
   type PackageAuditResult,
   type DepAuditReport,
 } from '../shared-types';
-import { detectBunWorkspaces, parseBunAuditOutput } from './bun';
-import type { PackageManager, WorkspaceInfo } from './common';
-import { detectNpmWorkspaces, parseNpmAuditOutput } from './npm';
-import { detectPnpmWorkspaces, parsePnpmAuditOutput } from './pnpm';
+import { parseBunAuditOutput } from './bun';
+import {
+  findLockFiles,
+  type PackageManager,
+  type ParsedAuditOutput,
+  type WorkspaceInfo,
+} from './common';
+import { parseNpmAuditOutput } from './npm';
+import { parsePnpmAuditOutput } from './pnpm';
 
 const execFileAsync = promisify(execFile);
+
+const PACKAGE_MANAGERS: Record<PackageManager, {
+  lockFile: string;
+  parse: (stdout: string, stderr: string) => ParsedAuditOutput;
+}> = {
+  pnpm: { lockFile: 'pnpm-lock.yaml', parse: parsePnpmAuditOutput },
+  npm: { lockFile: 'package-lock.json', parse: parseNpmAuditOutput },
+  bun: { lockFile: 'bun.lock', parse: parseBunAuditOutput },
+};
 
 // #region package.json discovery
 
@@ -40,7 +54,7 @@ async function findAllPackageJsonDirs(rootPath: string, fs: FileSystem): Promise
   }
 
   await walk(rootPath);
-  return [...new Set(results)].sort();
+  return results.sort();
 }
 
 function classifyPackages(
@@ -165,11 +179,12 @@ export async function depAudit({
 
   console.log(`Scanning ${resolvedRoot} for pnpm/npm/bun packages...\n`);
 
-  const workspaces = [
-    ...(await detectPnpmWorkspaces(resolvedRoot, fs)),
-    ...(await detectNpmWorkspaces(resolvedRoot, fs)),
-    ...(await detectBunWorkspaces(resolvedRoot, fs)),
-  ];
+  const workspaces: WorkspaceInfo[] = [];
+  for (const [packageManager, { lockFile }] of Object.entries(PACKAGE_MANAGERS)) {
+    for (const lockFileDir of await findLockFiles(resolvedRoot, lockFile, fs)) {
+      workspaces.push({ packageManager: packageManager as PackageManager, lockFileDir });
+    }
+  }
   const allPackageDirs = await findAllPackageJsonDirs(resolvedRoot, fs);
   const { workspaceAuditRoots, strayPackageDirs } = classifyPackages(allPackageDirs, workspaces);
 
@@ -189,11 +204,7 @@ export async function depAudit({
     const { stdout, stderr, error } = await runAudit(ws.packageManager, auditRoot);
     const parsed = error
       ? { vulnerabilities: [], error }
-      : ws.packageManager === 'npm'
-        ? parseNpmAuditOutput(stdout)
-        : ws.packageManager === 'bun'
-          ? parseBunAuditOutput(stdout, stderr)
-          : parsePnpmAuditOutput(stdout, stderr);
+      : PACKAGE_MANAGERS[ws.packageManager].parse(stdout, stderr);
 
     if (parsed.error) {
       console.log(`  ✖ ${parsed.error}`);

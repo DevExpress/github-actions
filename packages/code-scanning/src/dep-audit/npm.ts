@@ -1,11 +1,8 @@
-import { FileSystem } from '../file-system';
 import type { AuditVulnerability } from '../shared-types';
 import {
-  findLockFiles,
   parseSeverityLevel,
   tryParseJson,
   type ParsedAuditOutput,
-  type WorkspaceInfo,
 } from './common';
 
 interface NpmAuditVia {
@@ -49,12 +46,4 @@ export function parseNpmAuditOutput(stdout: string): ParsedAuditOutput {
     }
   }
   return { vulnerabilities: result };
-}
-
-export async function detectNpmWorkspaces(
-  rootPath: string,
-  fs: FileSystem,
-): Promise<WorkspaceInfo[]> {
-  const dirs = await findLockFiles(rootPath, 'package-lock.json', fs);
-  return dirs.map((dir) => ({ packageManager: 'npm', lockFileDir: dir }));
 }
