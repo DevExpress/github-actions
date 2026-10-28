@@ -12,7 +12,7 @@
 #   git clone --local /path/to/this/repo /tmp/publish-test
 #   cd /tmp/publish-test
 #   pnpm install --frozen-lockfile && pnpm dist
-#   BRANCH=... ACTION_DIRS=... WORKFLOW_FILES=... TAGS=... SHA=$(git rev-parse HEAD) GIT_USER_NAME=... GIT_USER_EMAIL=... ./scripts/publish-actions.sh
+#   BRANCH=... ACTION_DIRS=... WORKFLOW_FILES=... TAGS=... SHA=$(git rev-parse HEAD) ./scripts/publish-actions.sh
 #
 # Or, to test uncommitted edits to this script itself, run /path/to/this/repo/scripts/publish-actions.sh instead
 #
@@ -54,8 +54,10 @@ if git diff --cached --quiet; then
   exit 0
 fi
 
-# $SHA must already be a resolved commit hash, not a ref like "HEAD"
-git -c user.name="$GIT_USER_NAME" -c user.email="$GIT_USER_EMAIL" commit -m "publish: ${MESSAGE:-$(git log -1 --format=%s "$SHA")}"
+# $SHA must already be a resolved commit hash, not a ref like "HEAD".
+# The publish commit keeps the author and committer of the commit it publishes.
+git -c user.name="$(git log -1 --format=%cn "$SHA")" -c user.email="$(git log -1 --format=%ce "$SHA")" \
+  commit --author="$(git log -1 --format='%an <%ae>' "$SHA")" -m "${MESSAGE:-$(git log -1 --format=%s "$SHA")}"
 git push origin "$BRANCH"
 
 # An empty $TAGS would otherwise turn `git push origin --force $TAGS` into
