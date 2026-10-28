@@ -268,7 +268,7 @@ importers:
         version: 24.13.2
       '@types/semver':
         specifier: ^7.7.1
-        version: 7.7.1
+        version: 7.8.0
       common:
         specifier: workspace:*
         version: link:../common
@@ -627,8 +627,8 @@ packages:
   '@types/picomatch@4.0.3':
     resolution: {integrity: sha512-iG0T6+nYJ9FAPmx9SsUlnwcq1ZVRuCXcVEvWnntoPlrOpwtSTKNDC9uVAxTsC3PUvJ+99n4RpAcNgBbHX3JSnQ==}
 
-  '@types/semver@7.7.1':
-    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
+  '@types/semver@7.8.0':
+    resolution: {integrity: sha512-1mAINjtQCXXeLkJ9ehXkwOcBpqtLxiVtKhpUf83DdRNdQKV0iXZpaHYqRr7nj+wvxuJzoAmAwXI+sCNMv1CzLQ==}
 
   '@vercel/ncc@0.38.4':
     resolution: {integrity: sha512-8LwjnlP39s08C08J5NstzriPvW1SP8Zfpp1BvC2sI35kPeZnHfxVkCwu4/+Wodgnd60UtT1n8K8zw+Mp7J9JmQ==}
@@ -1346,7 +1346,7 @@ snapshots:
 
   '@types/picomatch@4.0.3': {}
 
-  '@types/semver@7.7.1': {}
+  '@types/semver@7.8.0': {}
 
   '@vercel/ncc@0.38.4': {}
 
