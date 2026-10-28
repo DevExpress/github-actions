@@ -203,43 +203,31 @@ export async function depAudit({
     );
 
     const { stdout, stderr, error } = await runAudit(ws.packageManager, auditRoot);
-
-    if (error) {
-      console.log(`  ✖ ${error}`);
-      packages.push({
-        directory: auditRoot,
-        relativeDirectory: relDir,
-        vulnerabilities: [],
-        error,
-        isWorkspaceMember: true,
-        packageManager: ws.packageManager,
-      });
-    } else {
-      const parsed = ws.packageManager === 'npm'
+    const parsed = error
+      ? { vulnerabilities: [], error }
+      : ws.packageManager === 'npm'
         ? parseNpmAuditOutput(stdout)
         : ws.packageManager === 'bun'
           ? parseBunAuditOutput(stdout, stderr)
           : parsePnpmAuditOutput(stdout, stderr);
-      if (parsed.error) {
-        console.log(`  ⚠ ${parsed.error}`);
-      }
-      if (parsed.vulnerabilities.length > 0) {
-        for (const v of parsed.vulnerabilities) {
-          const fixInfo = v.fixAvailable ? ' (fix available)' : '';
-          console.log(`  ${v.severity.toUpperCase()} ${v.name}: ${v.title}${fixInfo}`);
-        }
-      } else {
-        console.log('  No vulnerabilities found.');
-      }
-      packages.push({
-        directory: auditRoot,
-        relativeDirectory: relDir,
-        vulnerabilities: parsed.vulnerabilities,
-        error: parsed.error,
-        isWorkspaceMember: true,
-        packageManager: ws.packageManager,
-      });
+
+    if (parsed.error) {
+      console.log(`  ✖ ${parsed.error}`);
+    } else if (parsed.vulnerabilities.length === 0) {
+      console.log('  No vulnerabilities found.');
     }
+    for (const v of parsed.vulnerabilities) {
+      const fixInfo = v.fixAvailable ? ' (fix available)' : '';
+      console.log(`  ${v.severity.toUpperCase()} ${v.name}: ${v.title}${fixInfo}`);
+    }
+    packages.push({
+      directory: auditRoot,
+      relativeDirectory: relDir,
+      vulnerabilities: parsed.vulnerabilities,
+      error: parsed.error,
+      isWorkspaceMember: true,
+      packageManager: ws.packageManager,
+    });
   }
 
   // Audit stray packages
