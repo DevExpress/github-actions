@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { FileSystem } from '../file-system';
 import type { AuditVulnerability } from '../shared-types';
 import {
@@ -65,85 +63,12 @@ function extractFromAdvisories(
 
 // #region pnpm workspace detection
 
-async function parsePnpmWorkspaceYaml(
-  workspaceYamlPath: string,
-  fs: FileSystem,
-): Promise<string[]> {
-  if (!(await fs.exists(workspaceYamlPath))) return [];
-  const content = await fs.readFile!(workspaceYamlPath);
-  const patterns: string[] = [];
-  let inPackages = false;
-  for (const line of content.split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (/^packages\s*:/.test(trimmed)) {
-      inPackages = true;
-      continue;
-    }
-    if (inPackages) {
-      if (/^[a-zA-Z]/.test(trimmed) && !trimmed.startsWith('-')) {
-        break;
-      }
-      const match = trimmed.match(/^-\s+['"]?([^'"]+)['"]?\s*$/);
-      if (match) {
-        patterns.push(match[1]);
-      }
-    }
-  }
-  return patterns;
-}
-
-async function resolveWorkspaceMembers(
-  lockFileDir: string,
-  patterns: string[],
-  fs: FileSystem,
-): Promise<Set<string>> {
-  const members = new Set<string>();
-  members.add(path.resolve(lockFileDir));
-
-  for (const pattern of patterns) {
-    if (pattern.startsWith('!')) continue;
-    const globBase = pattern.replace(/\/\*\*?$/, '').replace(/\*$/, '');
-    const searchDir = path.resolve(lockFileDir, globBase);
-    if (!(await fs.exists(searchDir))) continue;
-
-    try {
-      if (await fs.isDirectory(searchDir)) {
-        if (pattern.endsWith('/*') || pattern.endsWith('/**')) {
-          const entries = await fs.readdir(searchDir);
-          for (const entry of entries) {
-            const full = path.resolve(searchDir, entry);
-            if (
-              (await fs.isDirectory(full))
-              && (await fs.exists(path.join(full, 'package.json')))
-            ) {
-              members.add(full);
-            }
-          }
-        } else if (await fs.exists(path.join(searchDir, 'package.json'))) {
-          members.add(searchDir);
-        }
-      }
-    } catch {
-      /* skip */
-    }
-  }
-  return members;
-}
-
 export async function detectPnpmWorkspaces(
   rootPath: string,
   fs: FileSystem,
 ): Promise<WorkspaceInfo[]> {
-  const workspaces: WorkspaceInfo[] = [];
-
-  for (const dir of await findLockFiles(rootPath, 'pnpm-lock.yaml', fs)) {
-    const workspaceYaml = path.join(dir, 'pnpm-workspace.yaml');
-    const memberPatterns = await parsePnpmWorkspaceYaml(workspaceYaml, fs);
-    const memberDirs = await resolveWorkspaceMembers(dir, memberPatterns, fs);
-    workspaces.push({ packageManager: 'pnpm', lockFileDir: dir, memberPatterns, memberDirs });
-  }
-
-  return workspaces;
+  const dirs = await findLockFiles(rootPath, 'pnpm-lock.yaml', fs);
+  return dirs.map((dir) => ({ packageManager: 'pnpm', lockFileDir: dir }));
 }
 
 // #endregion

@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { FileSystem } from '../file-system';
 import type { AuditVulnerability } from '../shared-types';
 import {
@@ -45,16 +43,10 @@ export function parseBunAuditOutput(stdout: string, stderr: string): ParsedAudit
   return { vulnerabilities: result };
 }
 
-// bun workspace members live under the lock file dir, so isSubdirectory covers them
 export async function detectBunWorkspaces(
   rootPath: string,
   fs: FileSystem,
 ): Promise<WorkspaceInfo[]> {
   const dirs = await findLockFiles(rootPath, 'bun.lock', fs);
-  return dirs.map((dir) => ({
-    packageManager: 'bun',
-    lockFileDir: dir,
-    memberPatterns: [],
-    memberDirs: new Set([path.resolve(dir)]),
-  }));
+  return dirs.map((dir) => ({ packageManager: 'bun', lockFileDir: dir }));
 }

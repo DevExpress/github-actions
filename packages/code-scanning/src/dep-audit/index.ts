@@ -58,7 +58,7 @@ function classifyPackages(
     const resolved = path.resolve(pkgDir);
     let found = false;
     for (const ws of workspaces) {
-      if (ws.memberDirs.has(resolved) || isSubdirectory(ws.lockFileDir, resolved)) {
+      if (resolved === ws.lockFileDir || isSubdirectory(ws.lockFileDir, resolved)) {
         workspaceAuditRoots.get(ws)!.push(pkgDir);
         found = true;
         break;

@@ -8,8 +8,6 @@ export type PackageManager = 'pnpm' | 'npm' | 'bun';
 export interface WorkspaceInfo {
   packageManager: PackageManager;
   lockFileDir: string;
-  memberPatterns: string[];
-  memberDirs: Set<string>;
 }
 
 export interface ParsedAuditOutput {

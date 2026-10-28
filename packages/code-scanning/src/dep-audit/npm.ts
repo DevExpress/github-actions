@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { FileSystem } from '../file-system';
 import type { AuditVulnerability } from '../shared-types';
 import {
@@ -53,16 +51,10 @@ export function parseNpmAuditOutput(stdout: string): ParsedAuditOutput {
   return { vulnerabilities: result };
 }
 
-// npm workspace members live under the lock file dir, so isSubdirectory covers them
 export async function detectNpmWorkspaces(
   rootPath: string,
   fs: FileSystem,
 ): Promise<WorkspaceInfo[]> {
   const dirs = await findLockFiles(rootPath, 'package-lock.json', fs);
-  return dirs.map((dir) => ({
-    packageManager: 'npm',
-    lockFileDir: dir,
-    memberPatterns: [],
-    memberDirs: new Set([path.resolve(dir)]),
-  }));
+  return dirs.map((dir) => ({ packageManager: 'npm', lockFileDir: dir }));
 }
