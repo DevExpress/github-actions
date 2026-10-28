@@ -99,9 +99,8 @@ async function runAudit(
   packageManager: PackageManager,
   cwd: string,
 ): Promise<{ stdout: string; stderr: string; error?: string }> {
-  const command = process.platform === 'win32' ? `${packageManager}.cmd` : packageManager;
   try {
-    const { stdout, stderr } = await execFileAsync(command, ['audit', '--json'], {
+    const { stdout, stderr } = await execFileAsync(packageManager, ['audit', '--json'], {
       cwd,
       maxBuffer: 50 * 1024 * 1024,
     });
