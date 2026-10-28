@@ -21,68 +21,20 @@ interface PnpmAuditAdvisory {
   patched_versions?: string;
 }
 
-function collectJsonPayloads(stdout: string, stderr: string): Record<string, unknown>[] {
-  const payloads: Record<string, unknown>[] = [];
-  for (const text of [stdout, stderr]) {
-    if (!text) continue;
-    const whole = tryParseJson(text);
-    if (whole) payloads.push(whole);
-    for (const line of text.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      const linePayload = tryParseJson(trimmed);
-      if (linePayload) payloads.push(linePayload);
-    }
-  }
-  return payloads;
-}
-
 export function parsePnpmAuditOutput(
   stdout: string,
   stderr: string,
 ): ParsedAuditOutput {
-  const trimmedStdout = stdout.trim();
-  const trimmedStderr = stderr.trim();
-
-  if (!trimmedStdout && !trimmedStderr) {
-    return { vulnerabilities: [], error: 'Audit output is empty' };
-  }
-
-  const payloads = collectJsonPayloads(trimmedStdout, trimmedStderr);
-
-  for (let i = payloads.length - 1; i >= 0; i--) {
-    const root = payloads[i];
-    const metadata = root['metadata'];
-    if (
-      !metadata
-      || typeof metadata !== 'object'
-      || !('dependencies' in (metadata as Record<string, unknown>))
-    ) {
-      continue;
-    }
-
-    const advisories = root['advisories'];
-    if (!advisories || typeof advisories !== 'object' || Array.isArray(advisories)) {
-      return { vulnerabilities: [] };
-    }
-
+  const json = tryParseJson(stdout);
+  if (json?.['advisories']) {
     return {
-      vulnerabilities: extractFromAdvisories(advisories as Record<string, Record<string, unknown>>),
+      vulnerabilities: extractFromAdvisories(json['advisories'] as Record<string, Record<string, unknown>>),
     };
   }
-
-  for (let i = payloads.length - 1; i >= 0; i--) {
-    const root = payloads[i];
-    if (typeof root['error'] === 'string') {
-      return { vulnerabilities: [], error: root['error'] };
-    }
-    if (root['error'] && typeof root['error'] === 'object') {
-      return { vulnerabilities: [], error: JSON.stringify(root['error']) };
-    }
-  }
-
-  const fallbackError = [trimmedStdout, trimmedStderr].filter(Boolean).join('\n');
-  return { vulnerabilities: [], error: fallbackError || 'Invalid pnpm audit output format' };
+  const error = json?.['error']
+    ? JSON.stringify(json['error'])
+    : stderr.trim() || stdout.trim() || 'Audit output is empty';
+  return { vulnerabilities: [], error };
 }
 
 function extractFromAdvisories(
