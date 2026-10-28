@@ -32,9 +32,11 @@ else
   git worktree add --orphan -b "$BRANCH" "$WORKTREE"
 fi
 
-# Copy each built action into place, replacing whatever was there before.
+# Remove every published action, so ones dropped from $ACTION_DIRS don't linger.
+find "$WORKTREE" -mindepth 1 -maxdepth 1 -type d ! -name .git ! -name .github -exec rm -rf {} +
+
+# Copy each built action into place.
 for name in $ACTION_DIRS; do
-  rm -rf "$WORKTREE/$name"
   cp -r "$name" "$WORKTREE/$name"
 done
 
