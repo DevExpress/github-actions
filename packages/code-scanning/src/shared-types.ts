@@ -80,5 +80,5 @@ export interface DepAuditReport {
   ignoredAdvisories?: string[];
   ignoredVulnerabilities?: AuditVulnerability[];
 }
-export const PNPM_AUDIT_REPORT_FILENAME = 'dep-audit-report.json';
+export const DEP_AUDIT_REPORT_FILENAME = 'dep-audit-report.json';
 //#endregion

@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import { FileSystem, NodeFileSystem } from '../file-system';
 import {
-  PNPM_AUDIT_REPORT_FILENAME,
+  DEP_AUDIT_REPORT_FILENAME,
   type AuditVulnerability,
   type PackageAuditResult,
   type DepAuditReport,
@@ -348,7 +348,7 @@ async function saveReport(
   artifactsPath: string,
   fs: FileSystem,
 ): Promise<void> {
-  const outputFilePath = path.resolve(artifactsPath, PNPM_AUDIT_REPORT_FILENAME);
+  const outputFilePath = path.resolve(artifactsPath, DEP_AUDIT_REPORT_FILENAME);
   const jsonContent = JSON.stringify(report, null, 2);
 
   if (fs.writeFile) {

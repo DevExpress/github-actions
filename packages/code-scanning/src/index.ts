@@ -24,5 +24,5 @@ export {
   type PackageAuditResult,
   type AuditVulnerability,
   AuditSeverity,
-  PNPM_AUDIT_REPORT_FILENAME,
+  DEP_AUDIT_REPORT_FILENAME,
 } from './shared-types';
