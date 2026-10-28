@@ -108,13 +108,8 @@ async function runAudit(
     return { stdout, stderr };
   } catch (err: unknown) {
     if (err && typeof err === 'object' && 'stdout' in err) {
-      const execErr = err as { stdout: string; stderr: string; code?: number };
-      const stderrLower = (execErr.stderr ?? '').toLowerCase();
-      if (
-        stderrLower.includes('command not found')
-        || stderrLower.includes('enoent')
-        || stderrLower.includes('cannot find')
-      ) {
+      const execErr = err as { stdout: string; stderr: string; code?: unknown };
+      if (execErr.code === 'ENOENT') {
         return { stdout: '', stderr: '', error: `${packageManager} is not installed or not found in PATH` };
       }
       return { stdout: execErr.stdout ?? '', stderr: execErr.stderr ?? '' };
