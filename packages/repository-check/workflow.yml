@@ -10,7 +10,7 @@ on:
         default: '{}'
       extraDetails:
         type: string
-        description: 'Markdown the repository contributes about itself. Published as extra-details.md in the health-check artifact, which the repository monitor appends to the repository issue body.'
+        description: 'Markdown the repository contributes about itself. Published as extra-details.md in the repository-check artifact, which the repository monitor appends to the repository issue body.'
         required: false
         default: ''
 
@@ -63,7 +63,7 @@ jobs:
       - name: Upload validation results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: health-check
+          name: repository-check
           path: |
             artifacts/*.json
             artifacts/*.md
