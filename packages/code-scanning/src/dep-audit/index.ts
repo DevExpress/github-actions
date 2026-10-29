@@ -68,10 +68,13 @@ function classifyPackages(
     workspaceAuditRoots.set(ws, []);
   }
 
+  // A package belongs to its closest lock file, so match deeper lock file dirs first
+  const closestFirst = [...workspaces].sort((a, b) => b.lockFileDir.length - a.lockFileDir.length);
+
   for (const pkgDir of packageDirs) {
     const resolved = path.resolve(pkgDir);
     let found = false;
-    for (const ws of workspaces) {
+    for (const ws of closestFirst) {
       if (resolved === ws.lockFileDir || isSubdirectory(ws.lockFileDir, resolved)) {
         workspaceAuditRoots.get(ws)!.push(pkgDir);
         found = true;
