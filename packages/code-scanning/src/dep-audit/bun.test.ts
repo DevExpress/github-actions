@@ -29,9 +29,9 @@ describe('parseBunAuditOutput', () => {
   });
 
   it('should return error when bun audit prints no JSON', () => {
-    const result = parseBunAuditOutput('', 'error: Lockfile not found');
+    const result = parseBunAuditOutput('', '\x1b[0m\x1b[1mbun audit \x1b[0m\nerror: Lockfile not found');
 
     expect(result.vulnerabilities).toEqual([]);
-    expect(result.error).toContain('Lockfile not found');
+    expect(result.error).toBe('bun audit \nerror: Lockfile not found');
   });
 });

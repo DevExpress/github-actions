@@ -22,10 +22,9 @@ interface BunAuditAdvisory {
 export function parseBunAuditOutput(stdout: string, stderr: string): ParsedAuditOutput {
   const root = tryParseJson(stdout.trim());
   if (!root) {
-    return {
-      vulnerabilities: [],
-      error: stdout.trim() || stderr.trim() || 'Invalid bun audit output format',
-    };
+    // bun colors its errors even when the output is not a terminal
+    const error = (stdout.trim() || stderr.trim()).replace(/\x1b\[[0-9;]*m/g, '');
+    return { vulnerabilities: [], error: error || 'Invalid bun audit output format' };
   }
 
   const result: AuditVulnerability[] = [];
