@@ -36145,7 +36145,9 @@ function isSubdirectory(parent, child) {
 // #region Running audit
 async function runAudit(packageManager, cwd) {
     try {
-        const { stdout, stderr } = await execFileAsync(packageManager, ['audit', '--json'], {
+        // npm/pnpm audit the nearest parent package.json when cwd has a lock file but none; bun has no such flag
+        const variableArgs = { npm: ['--prefix', cwd], pnpm: ['--dir', cwd], bun: [] }[packageManager];
+        const { stdout, stderr } = await execFileAsync(packageManager, ['audit', '--json', ...variableArgs], {
             cwd,
             maxBuffer: 50 * 1024 * 1024,
         });
