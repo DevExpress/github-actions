@@ -2,325 +2,18 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import * as path from 'path';
 
-import { FileSystem, NodeFileSystem } from './file-system';
+import { FileSystem, NodeFileSystem } from '../file-system';
 import {
-  AuditSeverity,
-  PNPM_AUDIT_REPORT_FILENAME,
+  DEP_AUDIT_REPORT_FILENAME,
   type AuditVulnerability,
   type PackageAuditResult,
-  type PnpmAuditReport,
-} from './shared-types';
+  type DepAuditReport,
+} from '../shared-types';
+import type { PackageManager, WorkspaceInfo } from './common';
+import { detectNpmWorkspaces, parseNpmAuditOutput } from './npm';
+import { detectPnpmWorkspaces, parsePnpmAuditOutput } from './pnpm';
 
 const execFileAsync = promisify(execFile);
-
-// #region pnpm audit parsing
-
-interface PnpmAuditAdvisory {
-  module_name?: string;
-  severity?: string;
-  title?: string;
-  url?: string;
-  vulnerable_versions?: string;
-  patched_versions?: string;
-}
-
-function parseSeverityLevel(severity?: string): AuditSeverity {
-  switch ((severity ?? '').toLowerCase()) {
-    case 'critical':
-      return AuditSeverity.Critical;
-    case 'high':
-      return AuditSeverity.High;
-    case 'moderate':
-      return AuditSeverity.Moderate;
-    case 'low':
-      return AuditSeverity.Low;
-    case 'info':
-      return AuditSeverity.Info;
-    default:
-      return AuditSeverity.Info;
-  }
-}
-
-function tryParseJson(text: string): Record<string, unknown> | undefined {
-  try {
-    const parsed = JSON.parse(text);
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-  } catch {
-    /* ignore */
-  }
-  return undefined;
-}
-
-function collectJsonPayloads(stdout: string, stderr: string): Record<string, unknown>[] {
-  const payloads: Record<string, unknown>[] = [];
-  for (const text of [stdout, stderr]) {
-    if (!text) continue;
-    const whole = tryParseJson(text);
-    if (whole) payloads.push(whole);
-    for (const line of text.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      const linePayload = tryParseJson(trimmed);
-      if (linePayload) payloads.push(linePayload);
-    }
-  }
-  return payloads;
-}
-
-export function parseAuditOutput(
-  stdout: string,
-  stderr: string,
-): { vulnerabilities: AuditVulnerability[]; error?: string } {
-  const trimmedStdout = stdout.trim();
-  const trimmedStderr = stderr.trim();
-
-  if (!trimmedStdout && !trimmedStderr) {
-    return { vulnerabilities: [], error: 'Audit output is empty' };
-  }
-
-  const payloads = collectJsonPayloads(trimmedStdout, trimmedStderr);
-
-  for (let i = payloads.length - 1; i >= 0; i--) {
-    const root = payloads[i];
-    const metadata = root['metadata'];
-    if (
-      !metadata
-      || typeof metadata !== 'object'
-      || !('dependencies' in (metadata as Record<string, unknown>))
-    ) {
-      continue;
-    }
-
-    const advisories = root['advisories'];
-    if (!advisories || typeof advisories !== 'object' || Array.isArray(advisories)) {
-      return { vulnerabilities: [] };
-    }
-
-    return {
-      vulnerabilities: extractFromAdvisories(advisories as Record<string, Record<string, unknown>>),
-    };
-  }
-
-  for (let i = payloads.length - 1; i >= 0; i--) {
-    const root = payloads[i];
-    if (typeof root['error'] === 'string') {
-      return { vulnerabilities: [], error: root['error'] };
-    }
-    if (root['error'] && typeof root['error'] === 'object') {
-      return { vulnerabilities: [], error: JSON.stringify(root['error']) };
-    }
-  }
-
-  const fallbackError = [trimmedStdout, trimmedStderr].filter(Boolean).join('\n');
-  return { vulnerabilities: [], error: fallbackError || 'Invalid pnpm audit output format' };
-}
-
-function extractFromAdvisories(
-  advisories: Record<string, Record<string, unknown>>,
-): AuditVulnerability[] {
-  const result: AuditVulnerability[] = [];
-  for (const [id, advisory] of Object.entries(advisories)) {
-    if (!advisory || typeof advisory !== 'object') continue;
-    const a = advisory as unknown as PnpmAuditAdvisory;
-    const severity = a.severity ?? 'info';
-    const patchedVersions = a.patched_versions ?? '';
-    result.push({
-      id,
-      name: a.module_name ?? id,
-      severity,
-      severityLevel: parseSeverityLevel(severity),
-      title: a.title ?? a.module_name ?? id,
-      url: a.url,
-      vulnerableRange: a.vulnerable_versions,
-      patchedVersions: patchedVersions || undefined,
-      fixAvailable: !!(patchedVersions && patchedVersions !== '<0.0.0'),
-    });
-  }
-  return result;
-}
-
-// #endregion
-
-// #region npm audit parsing
-
-interface NpmAuditVia {
-  source: number;
-  name: string;
-  title: string;
-  url: string;
-  severity: string;
-  range: string;
-}
-
-interface NpmAuditEntry {
-  via: (NpmAuditVia | string)[];
-  fixAvailable: unknown;
-}
-
-export function parseNpmAuditOutput(
-  stdout: string,
-): { vulnerabilities: AuditVulnerability[]; error?: string } {
-  const root = tryParseJson(stdout.trim());
-  if (!root) {
-    return { vulnerabilities: [], error: stdout.trim() || 'Invalid npm audit output format' };
-  }
-  if (root['error']) {
-    return { vulnerabilities: [], error: JSON.stringify(root['error']) };
-  }
-
-  const entries = (root['vulnerabilities'] ?? {}) as Record<string, NpmAuditEntry>;
-  const result: AuditVulnerability[] = [];
-  for (const entry of Object.values(entries)) {
-    for (const via of entry.via) {
-      if (typeof via === 'string') continue;
-      result.push({
-        id: String(via.source),
-        name: via.name,
-        severity: via.severity,
-        severityLevel: parseSeverityLevel(via.severity),
-        title: via.title,
-        url: via.url,
-        vulnerableRange: via.range,
-        fixAvailable: !!entry.fixAvailable,
-      });
-    }
-  }
-  return { vulnerabilities: result };
-}
-
-// #endregion
-
-// #region workspace detection
-
-type PackageManager = 'pnpm' | 'npm';
-
-interface WorkspaceInfo {
-  packageManager: PackageManager;
-  lockFileDir: string;
-  memberPatterns: string[];
-  memberDirs: Set<string>;
-}
-
-async function findLockFiles(
-  rootPath: string,
-  lockFileName: string,
-  fs: FileSystem,
-): Promise<string[]> {
-  const results: string[] = [];
-
-  async function walk(dir: string): Promise<void> {
-    let entries: string[];
-    try {
-      entries = await fs.readdir(dir);
-    } catch {
-      return;
-    }
-    for (const entry of entries) {
-      if (entry === 'node_modules' || entry.startsWith('.')) continue;
-      const full = path.join(dir, entry);
-      if (await fs.isDirectory(full)) {
-        await walk(full);
-      } else if (entry === lockFileName) {
-        results.push(dir);
-      }
-    }
-  }
-
-  await walk(rootPath);
-  return results;
-}
-
-async function parsePnpmWorkspaceYaml(
-  workspaceYamlPath: string,
-  fs: FileSystem,
-): Promise<string[]> {
-  if (!(await fs.exists(workspaceYamlPath))) return [];
-  const content = await fs.readFile!(workspaceYamlPath);
-  const patterns: string[] = [];
-  let inPackages = false;
-  for (const line of content.split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (/^packages\s*:/.test(trimmed)) {
-      inPackages = true;
-      continue;
-    }
-    if (inPackages) {
-      if (/^[a-zA-Z]/.test(trimmed) && !trimmed.startsWith('-')) {
-        break;
-      }
-      const match = trimmed.match(/^-\s+['"]?([^'"]+)['"]?\s*$/);
-      if (match) {
-        patterns.push(match[1]);
-      }
-    }
-  }
-  return patterns;
-}
-
-async function resolveWorkspaceMembers(
-  lockFileDir: string,
-  patterns: string[],
-  fs: FileSystem,
-): Promise<Set<string>> {
-  const members = new Set<string>();
-  members.add(path.resolve(lockFileDir));
-
-  for (const pattern of patterns) {
-    if (pattern.startsWith('!')) continue;
-    const globBase = pattern.replace(/\/\*\*?$/, '').replace(/\*$/, '');
-    const searchDir = path.resolve(lockFileDir, globBase);
-    if (!(await fs.exists(searchDir))) continue;
-
-    try {
-      if (await fs.isDirectory(searchDir)) {
-        if (pattern.endsWith('/*') || pattern.endsWith('/**')) {
-          const entries = await fs.readdir(searchDir);
-          for (const entry of entries) {
-            const full = path.resolve(searchDir, entry);
-            if (
-              (await fs.isDirectory(full))
-              && (await fs.exists(path.join(full, 'package.json')))
-            ) {
-              members.add(full);
-            }
-          }
-        } else if (await fs.exists(path.join(searchDir, 'package.json'))) {
-          members.add(searchDir);
-        }
-      }
-    } catch {
-      /* skip */
-    }
-  }
-  return members;
-}
-
-async function detectWorkspaces(rootPath: string, fs: FileSystem): Promise<WorkspaceInfo[]> {
-  const workspaces: WorkspaceInfo[] = [];
-
-  for (const dir of await findLockFiles(rootPath, 'pnpm-lock.yaml', fs)) {
-    const workspaceYaml = path.join(dir, 'pnpm-workspace.yaml');
-    const memberPatterns = await parsePnpmWorkspaceYaml(workspaceYaml, fs);
-    const memberDirs = await resolveWorkspaceMembers(dir, memberPatterns, fs);
-    workspaces.push({ packageManager: 'pnpm', lockFileDir: dir, memberPatterns, memberDirs });
-  }
-
-  // npm workspace members live under the lock file dir, so isSubdirectory covers them
-  for (const dir of await findLockFiles(rootPath, 'package-lock.json', fs)) {
-    workspaces.push({
-      packageManager: 'npm',
-      lockFileDir: dir,
-      memberPatterns: [],
-      memberDirs: new Set([path.resolve(dir)]),
-    });
-  }
-
-  return workspaces;
-}
-
-// #endregion
 
 // #region package.json discovery
 
@@ -448,7 +141,7 @@ export function filterIgnoredAdvisories(
   return { processedPackages, ignoredVulnerabilities };
 }
 
-export async function pnpmAudit({
+export async function depAudit({
   targetPath,
   artifactsPath,
   fileSystem,
@@ -458,7 +151,7 @@ export async function pnpmAudit({
   artifactsPath: string;
   fileSystem?: FileSystem;
   ignoredAdvisories?: string[];
-}): Promise<PnpmAuditReport> {
+}): Promise<DepAuditReport> {
   const fs = fileSystem || new NodeFileSystem();
   const resolvedRoot = path.resolve(targetPath);
 
@@ -471,12 +164,15 @@ export async function pnpmAudit({
 
   console.log(`Scanning ${resolvedRoot} for pnpm/npm packages...\n`);
 
-  const workspaces = await detectWorkspaces(resolvedRoot, fs);
+  const workspaces = [
+    ...(await detectPnpmWorkspaces(resolvedRoot, fs)),
+    ...(await detectNpmWorkspaces(resolvedRoot, fs)),
+  ];
   const allPackageDirs = await findAllPackageJsonDirs(resolvedRoot, fs);
 
   if (allPackageDirs.length === 0) {
     console.log('No package.json files found. Nothing to audit.');
-    const report: PnpmAuditReport = {
+    const report: DepAuditReport = {
       succeeded: true,
       rootPath: resolvedRoot,
       packages: [],
@@ -514,11 +210,12 @@ export async function pnpmAudit({
         vulnerabilities: [],
         error,
         isWorkspaceMember: true,
+        packageManager: ws.packageManager,
       });
     } else {
       const parsed = ws.packageManager === 'npm'
         ? parseNpmAuditOutput(stdout)
-        : parseAuditOutput(stdout, stderr);
+        : parsePnpmAuditOutput(stdout, stderr);
       if (parsed.error) {
         console.log(`  ⚠ ${parsed.error}`);
       }
@@ -536,6 +233,7 @@ export async function pnpmAudit({
         vulnerabilities: parsed.vulnerabilities,
         error: parsed.error,
         isWorkspaceMember: true,
+        packageManager: ws.packageManager,
       });
     }
   }
@@ -548,12 +246,12 @@ export async function pnpmAudit({
 
     const hasLockFile = await fs.exists(path.join(strayDir, 'pnpm-lock.yaml'));
     if (!hasLockFile) {
-      console.log('  No pnpm-lock.yaml found. Skipping audit.');
+      console.log('  No lock file found. Skipping audit.');
       packages.push({
         directory: strayDir,
         relativeDirectory: relDir,
         vulnerabilities: [],
-        error: 'No pnpm-lock.yaml found',
+        error: 'No lock file found',
         isWorkspaceMember: false,
       });
       continue;
@@ -571,7 +269,7 @@ export async function pnpmAudit({
         isWorkspaceMember: false,
       });
     } else {
-      const parsed = parseAuditOutput(stdout, stderr);
+      const parsed = parsePnpmAuditOutput(stdout, stderr);
       if (parsed.error) {
         console.log(`  ⚠ ${parsed.error}`);
       }
@@ -609,7 +307,7 @@ export async function pnpmAudit({
   const packagesWithVulnerabilities = processedPackages.filter((p) => p.vulnerabilities.length > 0).length;
   const strayPackages = strayPackageDirs.map((d) => path.relative(resolvedRoot, d) || '.');
 
-  const report: PnpmAuditReport = {
+  const report: DepAuditReport = {
     succeeded: totalVulnerabilities === 0,
     rootPath: resolvedRoot,
     packages: processedPackages,
@@ -636,7 +334,7 @@ export async function pnpmAudit({
 
   if (strayPackages.length > 0) {
     console.log(
-      `⚠ ${strayPackages.length} stray package(s) found outside any pnpm workspace: ${strayPackages.join(', ')}`,
+      `⚠ ${strayPackages.length} stray package(s) found outside any workspace: ${strayPackages.join(', ')}`,
     );
   }
 
@@ -646,11 +344,11 @@ export async function pnpmAudit({
 }
 
 async function saveReport(
-  report: PnpmAuditReport,
+  report: DepAuditReport,
   artifactsPath: string,
   fs: FileSystem,
 ): Promise<void> {
-  const outputFilePath = path.resolve(artifactsPath, PNPM_AUDIT_REPORT_FILENAME);
+  const outputFilePath = path.resolve(artifactsPath, DEP_AUDIT_REPORT_FILENAME);
   const jsonContent = JSON.stringify(report, null, 2);
 
   if (fs.writeFile) {

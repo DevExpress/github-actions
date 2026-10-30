@@ -14,7 +14,7 @@
     "test": "tsc --noEmit -p tsconfig.test.json && vitest run --config ../../vitest.config.mts --root .",
     "scan:lock-files": "tsx scripts/run.ts validateLockFiles",
     "scan:node-versions": "tsx scripts/run.ts validateNodeVersions",
-    "scan:pnpm-audit": "tsx scripts/run.ts pnpmAudit",
+    "scan:dep-audit": "tsx scripts/run.ts depAudit",
     "scan": "tsx scripts/run.ts all"
   },
   "devDependencies": {

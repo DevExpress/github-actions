@@ -17,12 +17,12 @@ export {
   parseRepoCheckConfig,
 } from './config';
 export {
-  pnpmAudit,
-} from './pnpm-audit';
+  depAudit,
+} from './dep-audit';
 export {
-  type PnpmAuditReport,
+  type DepAuditReport,
   type PackageAuditResult,
   type AuditVulnerability,
   AuditSeverity,
-  PNPM_AUDIT_REPORT_FILENAME,
+  DEP_AUDIT_REPORT_FILENAME,
 } from './shared-types';

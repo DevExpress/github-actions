@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as path from 'node:path';
 
-import { parseRepoCheckConfig, pnpmAudit } from 'code-scanning';
+import { parseRepoCheckConfig, depAudit } from 'code-scanning';
 
 const ROOT_PAT = 'target';
 const ARTIFACTS_PATH = 'artifacts';
@@ -22,7 +22,7 @@ async function run(): Promise<void> {
     core.info(`Target path: ${targetPath}`);
     core.info(`Artifacts path: ${resolvedArtifactsPath}`);
 
-    const report = await pnpmAudit({
+    const report = await depAudit({
       targetPath,
       artifactsPath: resolvedArtifactsPath,
       ignoredAdvisories: config.ignoredAdvisories,

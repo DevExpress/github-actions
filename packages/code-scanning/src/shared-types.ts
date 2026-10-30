@@ -39,7 +39,7 @@ export interface NodeVersionReport {
 export const NODE_VERSIONS_REPORT_FILENAME = 'node-versions-report.json';
 //#endregion
 
-//#region pnpm-audit
+//#region dep-audit
 export enum AuditSeverity {
   Info = 0,
   Low = 1,
@@ -66,9 +66,10 @@ export interface PackageAuditResult {
   vulnerabilities: AuditVulnerability[];
   error?: string;
   isWorkspaceMember: boolean;
+  packageManager?: string;
 }
 
-export interface PnpmAuditReport {
+export interface DepAuditReport {
   succeeded: boolean;
   rootPath: string;
   packages: PackageAuditResult[];
@@ -79,5 +80,5 @@ export interface PnpmAuditReport {
   ignoredAdvisories?: string[];
   ignoredVulnerabilities?: AuditVulnerability[];
 }
-export const PNPM_AUDIT_REPORT_FILENAME = 'pnpm-audit-report.json';
+export const DEP_AUDIT_REPORT_FILENAME = 'dep-audit-report.json';
 //#endregion

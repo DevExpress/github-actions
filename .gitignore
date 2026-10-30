@@ -25,5 +25,5 @@ pnpm-debug.log*
 /lgtm/
 /validate-lock-files/
 /validate-node-versions/
-/pnpm-audit/
+/dep-audit/
 /repository-check.yml
