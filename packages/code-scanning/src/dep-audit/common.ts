@@ -57,7 +57,7 @@ export async function findLockFiles(
       return;
     }
     for (const entry of entries) {
-      if (entry === 'node_modules' || entry.startsWith('.')) continue;
+      if (entry === 'node_modules' || entry === '.git') continue;
       const full = path.join(dir, entry);
       if (await fs.isDirectory(full)) {
         await walk(full);

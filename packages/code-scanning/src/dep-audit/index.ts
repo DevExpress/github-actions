@@ -68,10 +68,13 @@ function classifyPackages(
     workspaceAuditRoots.set(ws, []);
   }
 
+  // A package belongs to its closest lock file, so match deeper lock file dirs first
+  const closestFirst = [...workspaces].sort((a, b) => b.lockFileDir.length - a.lockFileDir.length);
+
   for (const pkgDir of packageDirs) {
     const resolved = path.resolve(pkgDir);
     let found = false;
-    for (const ws of workspaces) {
+    for (const ws of closestFirst) {
       if (resolved === ws.lockFileDir || isSubdirectory(ws.lockFileDir, resolved)) {
         workspaceAuditRoots.get(ws)!.push(pkgDir);
         found = true;
@@ -99,22 +102,16 @@ async function runAudit(
   packageManager: PackageManager,
   cwd: string,
 ): Promise<{ stdout: string; stderr: string; error?: string }> {
-  const command = process.platform === 'win32' ? `${packageManager}.cmd` : packageManager;
   try {
-    const { stdout, stderr } = await execFileAsync(command, ['audit', '--json'], {
+    const { stdout, stderr } = await execFileAsync(packageManager, ['audit', '--json'], {
       cwd,
       maxBuffer: 50 * 1024 * 1024,
     });
     return { stdout, stderr };
   } catch (err: unknown) {
     if (err && typeof err === 'object' && 'stdout' in err) {
-      const execErr = err as { stdout: string; stderr: string; code?: number };
-      const stderrLower = (execErr.stderr ?? '').toLowerCase();
-      if (
-        stderrLower.includes('command not found')
-        || stderrLower.includes('enoent')
-        || stderrLower.includes('cannot find')
-      ) {
+      const execErr = err as { stdout: string; stderr: string; code?: unknown };
+      if (execErr.code === 'ENOENT') {
         return { stdout: '', stderr: '', error: `${packageManager} is not installed or not found in PATH` };
       }
       return { stdout: execErr.stdout ?? '', stderr: execErr.stderr ?? '' };
