@@ -12,7 +12,7 @@ describe('discoverLockFiles', () => {
     ['npm', 'package-lock.json'],
     ['yarn', 'yarn.lock'],
     ['pnpm', 'pnpm-lock.yaml'],
-    ['bun', 'bun.lockb'],
+    ['bun', 'bun.lock'],
   ])('should find package.json with %s lock file', async (manager, lockFile) => {
     const fs = new FileSystemMock({
       '/root': dir('package.json', lockFile),

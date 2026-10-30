@@ -3,7 +3,7 @@ import * as path from 'path';
 import { FileSystem } from '../file-system';
 import { AuditSeverity, type AuditVulnerability } from '../shared-types';
 
-export type PackageManager = 'pnpm' | 'npm';
+export type PackageManager = 'pnpm' | 'npm' | 'bun';
 
 export interface WorkspaceInfo {
   packageManager: PackageManager;

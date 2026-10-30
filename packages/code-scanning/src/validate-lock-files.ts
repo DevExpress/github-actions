@@ -13,7 +13,7 @@ const LOCK_FILES = [
   'package-lock.json',
   'yarn.lock',
   'pnpm-lock.yaml',
-  'bun.lockb',
+  'bun.lock',
 ] as const;
 
 interface WorkspaceInfo {

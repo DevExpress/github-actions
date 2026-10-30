@@ -1,6 +1,6 @@
 {
   "name": "dep-audit",
-  "description": "GitHub action to run pnpm/npm audit and report vulnerabilities",
+  "description": "GitHub action to run pnpm/npm/bun audit and report vulnerabilities",
   "version": "1.0.0",
   "author": "Developer Express Inc.",
   "license": "MIT",
