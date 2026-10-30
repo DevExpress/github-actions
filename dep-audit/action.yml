@@ -1,5 +1,5 @@
-name: pnpm Audit
-description: A GitHub Action to run pnpm audit and report vulnerabilities
+name: Dependency Audit
+description: A GitHub Action to run pnpm/npm/bun audit and report vulnerabilities
 
 inputs:
   target:

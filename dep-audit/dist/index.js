@@ -35895,6 +35895,510 @@ function parseRepoCheckConfig(input) {
 
 /***/ }),
 
+/***/ 4131:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseBunAuditOutput = parseBunAuditOutput;
+const common_1 = __nccwpck_require__(8285);
+// bun prints advisories grouped by package name: { "<name>": [advisory, ...] }
+function parseBunAuditOutput(stdout, stderr) {
+    const root = (0, common_1.tryParseJson)(stdout.trim());
+    if (!root) {
+        // bun colors its errors even when the output is not a terminal
+        const error = (stdout.trim() || stderr.trim()).replace(/\x1b\[[0-9;]*m/g, '');
+        return { vulnerabilities: [], error: error || 'Invalid bun audit output format' };
+    }
+    const result = [];
+    for (const [name, advisories] of Object.entries(root)) {
+        for (const a of advisories) {
+            result.push({
+                id: String(a.id),
+                name,
+                severity: a.severity,
+                severityLevel: (0, common_1.parseSeverityLevel)(a.severity),
+                title: a.title,
+                url: a.url,
+                vulnerableRange: a.vulnerable_versions,
+                fixAvailable: false,
+            });
+        }
+    }
+    return { vulnerabilities: result };
+}
+
+
+/***/ }),
+
+/***/ 8285:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseSeverityLevel = parseSeverityLevel;
+exports.tryParseJson = tryParseJson;
+exports.findLockFiles = findLockFiles;
+const path = __importStar(__nccwpck_require__(6928));
+const shared_types_1 = __nccwpck_require__(1181);
+function parseSeverityLevel(severity) {
+    switch ((severity ?? '').toLowerCase()) {
+        case 'critical':
+            return shared_types_1.AuditSeverity.Critical;
+        case 'high':
+            return shared_types_1.AuditSeverity.High;
+        case 'moderate':
+            return shared_types_1.AuditSeverity.Moderate;
+        case 'low':
+            return shared_types_1.AuditSeverity.Low;
+        default:
+            return shared_types_1.AuditSeverity.Info;
+    }
+}
+function tryParseJson(text) {
+    try {
+        const parsed = JSON.parse(text);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            return parsed;
+        }
+    }
+    catch {
+        /* ignore */
+    }
+    return undefined;
+}
+async function findLockFiles(rootPath, lockFileName, fs) {
+    const results = [];
+    async function walk(dir) {
+        let entries;
+        try {
+            entries = await fs.readdir(dir);
+        }
+        catch {
+            return;
+        }
+        for (const entry of entries) {
+            if (entry === 'node_modules' || entry === '.git')
+                continue;
+            const full = path.join(dir, entry);
+            if (await fs.isDirectory(full)) {
+                await walk(full);
+            }
+            else if (entry === lockFileName) {
+                results.push(dir);
+            }
+        }
+    }
+    await walk(rootPath);
+    return results;
+}
+
+
+/***/ }),
+
+/***/ 354:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.filterIgnoredAdvisories = filterIgnoredAdvisories;
+exports.depAudit = depAudit;
+const node_child_process_1 = __nccwpck_require__(1421);
+const node_util_1 = __nccwpck_require__(7975);
+const path = __importStar(__nccwpck_require__(6928));
+const file_system_1 = __nccwpck_require__(7026);
+const shared_types_1 = __nccwpck_require__(1181);
+const bun_1 = __nccwpck_require__(4131);
+const common_1 = __nccwpck_require__(8285);
+const npm_1 = __nccwpck_require__(511);
+const pnpm_1 = __nccwpck_require__(7710);
+const execFileAsync = (0, node_util_1.promisify)(node_child_process_1.execFile);
+const PACKAGE_MANAGERS = {
+    pnpm: { lockFile: 'pnpm-lock.yaml', parse: pnpm_1.parsePnpmAuditOutput },
+    npm: { lockFile: 'package-lock.json', parse: npm_1.parseNpmAuditOutput },
+    bun: { lockFile: 'bun.lock', parse: bun_1.parseBunAuditOutput },
+};
+// #region package.json discovery
+async function findAllPackageJsonDirs(rootPath, fs) {
+    const results = [];
+    async function walk(dir) {
+        let entries;
+        try {
+            entries = await fs.readdir(dir);
+        }
+        catch {
+            return;
+        }
+        for (const entry of entries) {
+            if (entry === 'node_modules')
+                continue;
+            const full = path.join(dir, entry);
+            if (await fs.isDirectory(full)) {
+                await walk(full);
+            }
+            else if (entry === 'package.json') {
+                results.push(dir);
+            }
+        }
+    }
+    await walk(rootPath);
+    return results.sort();
+}
+function classifyPackages(packageDirs, workspaces) {
+    const workspaceAuditRoots = new Map();
+    const strayPackageDirs = [];
+    for (const ws of workspaces) {
+        workspaceAuditRoots.set(ws, []);
+    }
+    // A package belongs to its closest lock file, so match deeper lock file dirs first
+    const closestFirst = [...workspaces].sort((a, b) => b.lockFileDir.length - a.lockFileDir.length);
+    for (const pkgDir of packageDirs) {
+        const resolved = path.resolve(pkgDir);
+        let found = false;
+        for (const ws of closestFirst) {
+            if (resolved === ws.lockFileDir || isSubdirectory(ws.lockFileDir, resolved)) {
+                workspaceAuditRoots.get(ws).push(pkgDir);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            strayPackageDirs.push(pkgDir);
+        }
+    }
+    return { workspaceAuditRoots, strayPackageDirs };
+}
+function isSubdirectory(parent, child) {
+    const rel = path.relative(parent, child);
+    return !!rel && !rel.startsWith('..') && !path.isAbsolute(rel);
+}
+// #endregion
+// #region Running audit
+async function runAudit(packageManager, cwd) {
+    try {
+        const { stdout, stderr } = await execFileAsync(packageManager, ['audit', '--json'], {
+            cwd,
+            maxBuffer: 50 * 1024 * 1024,
+        });
+        return { stdout, stderr };
+    }
+    catch (err) {
+        if (err && typeof err === 'object' && 'stdout' in err) {
+            const execErr = err;
+            if (execErr.code === 'ENOENT') {
+                return { stdout: '', stderr: '', error: `${packageManager} is not installed or not found in PATH` };
+            }
+            return { stdout: execErr.stdout ?? '', stderr: execErr.stderr ?? '' };
+        }
+        return { stdout: '', stderr: '', error: err instanceof Error ? err.message : String(err) };
+    }
+}
+// #endregion
+// #region Main
+function filterIgnoredAdvisories(packages, ignoredAdvisories) {
+    const ignoredSet = new Set(ignoredAdvisories ?? []);
+    if (ignoredSet.size === 0) {
+        return { processedPackages: packages, ignoredVulnerabilities: [] };
+    }
+    const isIgnored = (v) => {
+        if (ignoredSet.has(v.id))
+            return true;
+        if (v.url) {
+            const ghsaMatch = v.url.match(/\/(GHSA-[\w-]+)$/);
+            if (ghsaMatch && ignoredSet.has(ghsaMatch[1]))
+                return true;
+        }
+        return false;
+    };
+    const ignoredVulnerabilities = [];
+    const processedPackages = packages.map((pkg) => {
+        const ignored = pkg.vulnerabilities.filter(isIgnored);
+        if (ignored.length === 0)
+            return pkg;
+        ignoredVulnerabilities.push(...ignored);
+        return { ...pkg, vulnerabilities: pkg.vulnerabilities.filter((v) => !isIgnored(v)) };
+    });
+    return { processedPackages, ignoredVulnerabilities };
+}
+async function depAudit({ targetPath, artifactsPath, fileSystem, ignoredAdvisories, }) {
+    const fs = fileSystem || new file_system_1.NodeFileSystem();
+    const resolvedRoot = path.resolve(targetPath);
+    if (!(await fs.exists(resolvedRoot))) {
+        throw new Error(`Path does not exist: ${resolvedRoot}`);
+    }
+    if (!(await fs.isDirectory(resolvedRoot))) {
+        throw new Error(`Path is not a directory: ${resolvedRoot}`);
+    }
+    console.log(`Scanning ${resolvedRoot} for pnpm/npm/bun packages...\n`);
+    const workspaces = [];
+    for (const [packageManager, { lockFile }] of Object.entries(PACKAGE_MANAGERS)) {
+        for (const lockFileDir of await (0, common_1.findLockFiles)(resolvedRoot, lockFile, fs)) {
+            workspaces.push({ packageManager: packageManager, lockFileDir });
+        }
+    }
+    const allPackageDirs = await findAllPackageJsonDirs(resolvedRoot, fs);
+    const { workspaceAuditRoots, strayPackageDirs } = classifyPackages(allPackageDirs, workspaces);
+    const packages = [];
+    let counter = 0;
+    const totalAuditRuns = workspaceAuditRoots.size + strayPackageDirs.length;
+    // Audit workspace roots
+    for (const [ws, memberDirs] of workspaceAuditRoots) {
+        counter++;
+        const auditRoot = ws.lockFileDir;
+        const relDir = path.relative(resolvedRoot, auditRoot) || '.';
+        console.log(`(${counter}/${totalAuditRuns}) ${relDir} (${ws.packageManager} workspace root, ${memberDirs.length} packages)`);
+        const { stdout, stderr, error } = await runAudit(ws.packageManager, auditRoot);
+        const parsed = error
+            ? { vulnerabilities: [], error }
+            : PACKAGE_MANAGERS[ws.packageManager].parse(stdout, stderr);
+        if (parsed.error) {
+            console.log(`  ✖ ${parsed.error}`);
+        }
+        else if (parsed.vulnerabilities.length === 0) {
+            console.log('  No vulnerabilities found.');
+        }
+        for (const v of parsed.vulnerabilities) {
+            const fixInfo = v.fixAvailable ? ' (fix available)' : '';
+            console.log(`  ${v.severity.toUpperCase()} ${v.name}: ${v.title}${fixInfo}`);
+        }
+        packages.push({
+            directory: auditRoot,
+            relativeDirectory: relDir,
+            vulnerabilities: parsed.vulnerabilities,
+            error: parsed.error,
+            isWorkspaceMember: true,
+            packageManager: ws.packageManager,
+        });
+    }
+    // Audit stray packages
+    for (const strayDir of strayPackageDirs) {
+        counter++;
+        const relDir = path.relative(resolvedRoot, strayDir) || '.';
+        console.log(`(${counter}/${totalAuditRuns}) ${relDir} (stray package)`);
+        console.log('  No lock file found. Skipping audit.');
+        packages.push({
+            directory: strayDir,
+            relativeDirectory: relDir,
+            vulnerabilities: [],
+            error: 'No lock file found',
+            isWorkspaceMember: false,
+        });
+    }
+    const { processedPackages, ignoredVulnerabilities } = filterIgnoredAdvisories(packages, ignoredAdvisories);
+    // Build result
+    const totalVulnerabilities = processedPackages.reduce((sum, p) => sum + p.vulnerabilities.length, 0);
+    const bySeverity = {};
+    for (const pkg of processedPackages) {
+        for (const v of pkg.vulnerabilities) {
+            bySeverity[v.severity] = (bySeverity[v.severity] ?? 0) + 1;
+        }
+    }
+    const packagesWithVulnerabilities = processedPackages.filter((p) => p.vulnerabilities.length > 0).length;
+    const strayPackages = strayPackageDirs.map((d) => path.relative(resolvedRoot, d) || '.');
+    const report = {
+        succeeded: totalVulnerabilities === 0,
+        rootPath: resolvedRoot,
+        packages: processedPackages,
+        totalVulnerabilities,
+        bySeverity,
+        packagesWithVulnerabilities,
+        strayPackages,
+        ignoredAdvisories: ignoredAdvisories?.length ? ignoredAdvisories : undefined,
+        ignoredVulnerabilities: ignoredVulnerabilities.length > 0 ? ignoredVulnerabilities : undefined,
+    };
+    // Summary output
+    if (totalVulnerabilities === 0) {
+        console.log('\nTotal: 0 vulnerabilities found. Everything is clear.');
+    }
+    else {
+        const sevSummary = Object.entries(bySeverity)
+            .sort(([, a], [, b]) => b - a)
+            .map(([sev, count]) => `${count} ${sev}`)
+            .join(', ');
+        console.log(`\n✖ Found ${totalVulnerabilities} vulnerabilities (${sevSummary}) in ${packagesWithVulnerabilities} packages.`);
+    }
+    if (strayPackages.length > 0) {
+        console.log(`⚠ ${strayPackages.length} stray package(s) found outside any workspace: ${strayPackages.join(', ')}`);
+    }
+    await saveReport(report, artifactsPath, fs);
+    return report;
+}
+async function saveReport(report, artifactsPath, fs) {
+    const outputFilePath = path.resolve(artifactsPath, shared_types_1.DEP_AUDIT_REPORT_FILENAME);
+    const jsonContent = JSON.stringify(report, null, 2);
+    if (fs.writeFile) {
+        const outputDir = path.dirname(outputFilePath);
+        if (fs.mkdir) {
+            await fs.mkdir(outputDir, { recursive: true });
+        }
+        await fs.writeFile(outputFilePath, jsonContent);
+        console.log(`\n✅ Audit report saved to: ${outputFilePath}`);
+    }
+    else {
+        throw new Error('FileSystem does not support writeFile operation');
+    }
+}
+// #endregion
+
+
+/***/ }),
+
+/***/ 511:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseNpmAuditOutput = parseNpmAuditOutput;
+const common_1 = __nccwpck_require__(8285);
+function parseNpmAuditOutput(stdout) {
+    const root = (0, common_1.tryParseJson)(stdout.trim());
+    if (!root) {
+        return { vulnerabilities: [], error: stdout.trim() || 'Invalid npm audit output format' };
+    }
+    if (root['error']) {
+        return { vulnerabilities: [], error: JSON.stringify(root['error']) };
+    }
+    const entries = (root['vulnerabilities'] ?? {});
+    const result = [];
+    for (const entry of Object.values(entries)) {
+        for (const via of entry.via) {
+            if (typeof via === 'string')
+                continue;
+            result.push({
+                id: String(via.source),
+                name: via.name,
+                severity: via.severity,
+                severityLevel: (0, common_1.parseSeverityLevel)(via.severity),
+                title: via.title,
+                url: via.url,
+                vulnerableRange: via.range,
+                fixAvailable: !!entry.fixAvailable,
+            });
+        }
+    }
+    return { vulnerabilities: result };
+}
+
+
+/***/ }),
+
+/***/ 7710:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parsePnpmAuditOutput = parsePnpmAuditOutput;
+const common_1 = __nccwpck_require__(8285);
+function parsePnpmAuditOutput(stdout, stderr) {
+    const json = (0, common_1.tryParseJson)(stdout);
+    if (json?.['advisories']) {
+        return {
+            vulnerabilities: extractFromAdvisories(json['advisories']),
+        };
+    }
+    const error = json?.['error']
+        ? JSON.stringify(json['error'])
+        : stderr.trim() || stdout.trim() || 'Audit output is empty';
+    return { vulnerabilities: [], error };
+}
+function extractFromAdvisories(advisories) {
+    const result = [];
+    for (const [id, advisory] of Object.entries(advisories)) {
+        if (!advisory || typeof advisory !== 'object')
+            continue;
+        const a = advisory;
+        const severity = a.severity ?? 'info';
+        const patchedVersions = a.patched_versions ?? '';
+        result.push({
+            id,
+            name: a.module_name ?? id,
+            severity,
+            severityLevel: (0, common_1.parseSeverityLevel)(severity),
+            title: a.title ?? a.module_name ?? id,
+            url: a.url,
+            vulnerableRange: a.vulnerable_versions,
+            patchedVersions: patchedVersions || undefined,
+            fixAvailable: !!(patchedVersions && patchedVersions !== '<0.0.0'),
+        });
+    }
+    return result;
+}
+// #endregion
+
+
+/***/ }),
+
 /***/ 7026:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -35982,7 +36486,7 @@ exports.FileSystemMock = FileSystemMock;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PNPM_AUDIT_REPORT_FILENAME = exports.AuditSeverity = exports.pnpmAudit = exports.parseRepoCheckConfig = exports.NODE_VERSIONS_REPORT_FILENAME = exports.LOCK_FILES_REPORT_FILENAME = exports.validateNodeVersions = exports.validateLockFiles = void 0;
+exports.DEP_AUDIT_REPORT_FILENAME = exports.AuditSeverity = exports.depAudit = exports.parseRepoCheckConfig = exports.NODE_VERSIONS_REPORT_FILENAME = exports.LOCK_FILES_REPORT_FILENAME = exports.validateNodeVersions = exports.validateLockFiles = void 0;
 var validate_lock_files_1 = __nccwpck_require__(6970);
 Object.defineProperty(exports, "validateLockFiles", ({ enumerable: true, get: function () { return validate_lock_files_1.validateLockFiles; } }));
 var validate_node_versions_1 = __nccwpck_require__(8589);
@@ -35992,542 +36496,11 @@ Object.defineProperty(exports, "LOCK_FILES_REPORT_FILENAME", ({ enumerable: true
 Object.defineProperty(exports, "NODE_VERSIONS_REPORT_FILENAME", ({ enumerable: true, get: function () { return shared_types_1.NODE_VERSIONS_REPORT_FILENAME; } }));
 var config_1 = __nccwpck_require__(1650);
 Object.defineProperty(exports, "parseRepoCheckConfig", ({ enumerable: true, get: function () { return config_1.parseRepoCheckConfig; } }));
-var pnpm_audit_1 = __nccwpck_require__(6931);
-Object.defineProperty(exports, "pnpmAudit", ({ enumerable: true, get: function () { return pnpm_audit_1.pnpmAudit; } }));
+var dep_audit_1 = __nccwpck_require__(354);
+Object.defineProperty(exports, "depAudit", ({ enumerable: true, get: function () { return dep_audit_1.depAudit; } }));
 var shared_types_2 = __nccwpck_require__(1181);
 Object.defineProperty(exports, "AuditSeverity", ({ enumerable: true, get: function () { return shared_types_2.AuditSeverity; } }));
-Object.defineProperty(exports, "PNPM_AUDIT_REPORT_FILENAME", ({ enumerable: true, get: function () { return shared_types_2.PNPM_AUDIT_REPORT_FILENAME; } }));
-
-
-/***/ }),
-
-/***/ 6931:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseAuditOutput = parseAuditOutput;
-exports.filterIgnoredAdvisories = filterIgnoredAdvisories;
-exports.pnpmAudit = pnpmAudit;
-const node_child_process_1 = __nccwpck_require__(1421);
-const node_util_1 = __nccwpck_require__(7975);
-const path = __importStar(__nccwpck_require__(6928));
-const file_system_1 = __nccwpck_require__(7026);
-const shared_types_1 = __nccwpck_require__(1181);
-const execFileAsync = (0, node_util_1.promisify)(node_child_process_1.execFile);
-function parseSeverityLevel(severity) {
-    switch ((severity ?? '').toLowerCase()) {
-        case 'critical':
-            return shared_types_1.AuditSeverity.Critical;
-        case 'high':
-            return shared_types_1.AuditSeverity.High;
-        case 'moderate':
-            return shared_types_1.AuditSeverity.Moderate;
-        case 'low':
-            return shared_types_1.AuditSeverity.Low;
-        case 'info':
-            return shared_types_1.AuditSeverity.Info;
-        default:
-            return shared_types_1.AuditSeverity.Info;
-    }
-}
-function tryParseJson(text) {
-    try {
-        const parsed = JSON.parse(text);
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-            return parsed;
-        }
-    }
-    catch {
-        /* ignore */
-    }
-    return undefined;
-}
-function collectJsonPayloads(stdout, stderr) {
-    const payloads = [];
-    for (const text of [stdout, stderr]) {
-        if (!text)
-            continue;
-        const whole = tryParseJson(text);
-        if (whole)
-            payloads.push(whole);
-        for (const line of text.split(/\r?\n/)) {
-            const trimmed = line.trim();
-            if (!trimmed)
-                continue;
-            const linePayload = tryParseJson(trimmed);
-            if (linePayload)
-                payloads.push(linePayload);
-        }
-    }
-    return payloads;
-}
-function parseAuditOutput(stdout, stderr) {
-    const trimmedStdout = stdout.trim();
-    const trimmedStderr = stderr.trim();
-    if (!trimmedStdout && !trimmedStderr) {
-        return { vulnerabilities: [], error: 'Audit output is empty' };
-    }
-    const payloads = collectJsonPayloads(trimmedStdout, trimmedStderr);
-    for (let i = payloads.length - 1; i >= 0; i--) {
-        const root = payloads[i];
-        const metadata = root['metadata'];
-        if (!metadata
-            || typeof metadata !== 'object'
-            || !('dependencies' in metadata)) {
-            continue;
-        }
-        const advisories = root['advisories'];
-        if (!advisories || typeof advisories !== 'object' || Array.isArray(advisories)) {
-            return { vulnerabilities: [] };
-        }
-        return {
-            vulnerabilities: extractFromAdvisories(advisories),
-        };
-    }
-    for (let i = payloads.length - 1; i >= 0; i--) {
-        const root = payloads[i];
-        if (typeof root['error'] === 'string') {
-            return { vulnerabilities: [], error: root['error'] };
-        }
-        if (root['error'] && typeof root['error'] === 'object') {
-            return { vulnerabilities: [], error: JSON.stringify(root['error']) };
-        }
-    }
-    const fallbackError = [trimmedStdout, trimmedStderr].filter(Boolean).join('\n');
-    return { vulnerabilities: [], error: fallbackError || 'Invalid pnpm audit output format' };
-}
-function extractFromAdvisories(advisories) {
-    const result = [];
-    for (const [id, advisory] of Object.entries(advisories)) {
-        if (!advisory || typeof advisory !== 'object')
-            continue;
-        const a = advisory;
-        const severity = a.severity ?? 'info';
-        const patchedVersions = a.patched_versions ?? '';
-        result.push({
-            id,
-            name: a.module_name ?? id,
-            severity,
-            severityLevel: parseSeverityLevel(severity),
-            title: a.title ?? a.module_name ?? id,
-            url: a.url,
-            vulnerableRange: a.vulnerable_versions,
-            patchedVersions: patchedVersions || undefined,
-            fixAvailable: !!(patchedVersions && patchedVersions !== '<0.0.0'),
-        });
-    }
-    return result;
-}
-async function findPnpmLockFiles(rootPath, fs) {
-    const results = [];
-    async function walk(dir) {
-        let entries;
-        try {
-            entries = await fs.readdir(dir);
-        }
-        catch {
-            return;
-        }
-        for (const entry of entries) {
-            if (entry === 'node_modules' || entry.startsWith('.'))
-                continue;
-            const full = path.join(dir, entry);
-            if (await fs.isDirectory(full)) {
-                await walk(full);
-            }
-            else if (entry === 'pnpm-lock.yaml') {
-                results.push(dir);
-            }
-        }
-    }
-    await walk(rootPath);
-    return results;
-}
-async function parsePnpmWorkspaceYaml(workspaceYamlPath, fs) {
-    if (!(await fs.exists(workspaceYamlPath)))
-        return [];
-    const content = await fs.readFile(workspaceYamlPath);
-    const patterns = [];
-    let inPackages = false;
-    for (const line of content.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (/^packages\s*:/.test(trimmed)) {
-            inPackages = true;
-            continue;
-        }
-        if (inPackages) {
-            if (/^[a-zA-Z]/.test(trimmed) && !trimmed.startsWith('-')) {
-                break;
-            }
-            const match = trimmed.match(/^-\s+['"]?([^'"]+)['"]?\s*$/);
-            if (match) {
-                patterns.push(match[1]);
-            }
-        }
-    }
-    return patterns;
-}
-async function resolveWorkspaceMembers(lockFileDir, patterns, fs) {
-    const members = new Set();
-    members.add(path.resolve(lockFileDir));
-    for (const pattern of patterns) {
-        if (pattern.startsWith('!'))
-            continue;
-        const globBase = pattern.replace(/\/\*\*?$/, '').replace(/\*$/, '');
-        const searchDir = path.resolve(lockFileDir, globBase);
-        if (!(await fs.exists(searchDir)))
-            continue;
-        try {
-            if (await fs.isDirectory(searchDir)) {
-                if (pattern.endsWith('/*') || pattern.endsWith('/**')) {
-                    const entries = await fs.readdir(searchDir);
-                    for (const entry of entries) {
-                        const full = path.resolve(searchDir, entry);
-                        if ((await fs.isDirectory(full))
-                            && (await fs.exists(path.join(full, 'package.json')))) {
-                            members.add(full);
-                        }
-                    }
-                }
-                else if (await fs.exists(path.join(searchDir, 'package.json'))) {
-                    members.add(searchDir);
-                }
-            }
-        }
-        catch {
-            /* skip */
-        }
-    }
-    return members;
-}
-async function detectWorkspaces(rootPath, fs) {
-    const lockFileDirs = await findPnpmLockFiles(rootPath, fs);
-    const workspaces = [];
-    for (const dir of lockFileDirs) {
-        const workspaceYaml = path.join(dir, 'pnpm-workspace.yaml');
-        const memberPatterns = await parsePnpmWorkspaceYaml(workspaceYaml, fs);
-        const memberDirs = await resolveWorkspaceMembers(dir, memberPatterns, fs);
-        workspaces.push({ lockFileDir: dir, memberPatterns, memberDirs });
-    }
-    return workspaces;
-}
-// #endregion
-// #region package.json discovery
-async function findAllPackageJsonDirs(rootPath, fs) {
-    const results = [];
-    async function walk(dir) {
-        let entries;
-        try {
-            entries = await fs.readdir(dir);
-        }
-        catch {
-            return;
-        }
-        for (const entry of entries) {
-            if (entry === 'node_modules')
-                continue;
-            const full = path.join(dir, entry);
-            if (await fs.isDirectory(full)) {
-                await walk(full);
-            }
-            else if (entry === 'package.json') {
-                results.push(dir);
-            }
-        }
-    }
-    await walk(rootPath);
-    return [...new Set(results)].sort();
-}
-function classifyPackages(packageDirs, workspaces) {
-    const workspaceAuditRoots = new Map();
-    const strayPackageDirs = [];
-    for (const ws of workspaces) {
-        workspaceAuditRoots.set(ws.lockFileDir, []);
-    }
-    for (const pkgDir of packageDirs) {
-        const resolved = path.resolve(pkgDir);
-        let found = false;
-        for (const ws of workspaces) {
-            if (ws.memberDirs.has(resolved) || isSubdirectory(ws.lockFileDir, resolved)) {
-                workspaceAuditRoots.get(ws.lockFileDir).push(pkgDir);
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            strayPackageDirs.push(pkgDir);
-        }
-    }
-    return { workspaceAuditRoots, strayPackageDirs };
-}
-function isSubdirectory(parent, child) {
-    const rel = path.relative(parent, child);
-    return !!rel && !rel.startsWith('..') && !path.isAbsolute(rel);
-}
-// #endregion
-// #region Running pnpm audit
-function getPnpmCommand() {
-    return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-}
-async function runPnpmAudit(cwd) {
-    try {
-        const { stdout, stderr } = await execFileAsync(getPnpmCommand(), ['audit', '--json'], {
-            cwd,
-            maxBuffer: 50 * 1024 * 1024,
-        });
-        return { stdout, stderr };
-    }
-    catch (err) {
-        if (err && typeof err === 'object' && 'stdout' in err) {
-            const execErr = err;
-            const stderrLower = (execErr.stderr ?? '').toLowerCase();
-            if (stderrLower.includes('command not found')
-                || stderrLower.includes('enoent')
-                || stderrLower.includes('cannot find')) {
-                return { stdout: '', stderr: '', error: 'pnpm is not installed or not found in PATH' };
-            }
-            return { stdout: execErr.stdout ?? '', stderr: execErr.stderr ?? '' };
-        }
-        return { stdout: '', stderr: '', error: err instanceof Error ? err.message : String(err) };
-    }
-}
-// #endregion
-// #region Main
-function filterIgnoredAdvisories(packages, ignoredAdvisories) {
-    const ignoredSet = new Set(ignoredAdvisories ?? []);
-    if (ignoredSet.size === 0) {
-        return { processedPackages: packages, ignoredVulnerabilities: [] };
-    }
-    const isIgnored = (v) => {
-        if (ignoredSet.has(v.id))
-            return true;
-        if (v.url) {
-            const ghsaMatch = v.url.match(/\/(GHSA-[\w-]+)$/);
-            if (ghsaMatch && ignoredSet.has(ghsaMatch[1]))
-                return true;
-        }
-        return false;
-    };
-    const ignoredVulnerabilities = [];
-    const processedPackages = packages.map((pkg) => {
-        const ignored = pkg.vulnerabilities.filter(isIgnored);
-        if (ignored.length === 0)
-            return pkg;
-        ignoredVulnerabilities.push(...ignored);
-        return { ...pkg, vulnerabilities: pkg.vulnerabilities.filter((v) => !isIgnored(v)) };
-    });
-    return { processedPackages, ignoredVulnerabilities };
-}
-async function pnpmAudit({ targetPath, artifactsPath, fileSystem, ignoredAdvisories, }) {
-    const fs = fileSystem || new file_system_1.NodeFileSystem();
-    const resolvedRoot = path.resolve(targetPath);
-    if (!(await fs.exists(resolvedRoot))) {
-        throw new Error(`Path does not exist: ${resolvedRoot}`);
-    }
-    if (!(await fs.isDirectory(resolvedRoot))) {
-        throw new Error(`Path is not a directory: ${resolvedRoot}`);
-    }
-    console.log(`Scanning ${resolvedRoot} for pnpm packages...\n`);
-    const workspaces = await detectWorkspaces(resolvedRoot, fs);
-    const allPackageDirs = await findAllPackageJsonDirs(resolvedRoot, fs);
-    if (allPackageDirs.length === 0) {
-        console.log('No package.json files found. Nothing to audit.');
-        const report = {
-            succeeded: true,
-            rootPath: resolvedRoot,
-            packages: [],
-            totalVulnerabilities: 0,
-            bySeverity: {},
-            packagesWithVulnerabilities: 0,
-            strayPackages: [],
-        };
-        await saveReport(report, artifactsPath, fs);
-        return report;
-    }
-    const { workspaceAuditRoots, strayPackageDirs } = classifyPackages(allPackageDirs, workspaces);
-    const packages = [];
-    let counter = 0;
-    const totalAuditRuns = workspaceAuditRoots.size + strayPackageDirs.length;
-    // Audit workspace roots
-    for (const [auditRoot, memberDirs] of workspaceAuditRoots) {
-        counter++;
-        const relDir = path.relative(resolvedRoot, auditRoot) || '.';
-        console.log(`(${counter}/${totalAuditRuns}) ${relDir} (workspace root, ${memberDirs.length} packages)`);
-        const { stdout, stderr, error } = await runPnpmAudit(auditRoot);
-        if (error) {
-            console.log(`  ✖ ${error}`);
-            packages.push({
-                directory: auditRoot,
-                relativeDirectory: relDir,
-                vulnerabilities: [],
-                error,
-                isWorkspaceMember: true,
-            });
-        }
-        else {
-            const parsed = parseAuditOutput(stdout, stderr);
-            if (parsed.error) {
-                console.log(`  ⚠ ${parsed.error}`);
-            }
-            if (parsed.vulnerabilities.length > 0) {
-                for (const v of parsed.vulnerabilities) {
-                    const fixInfo = v.fixAvailable ? ' (fix available)' : '';
-                    console.log(`  ${v.severity.toUpperCase()} ${v.name}: ${v.title}${fixInfo}`);
-                }
-            }
-            else {
-                console.log('  No vulnerabilities found.');
-            }
-            packages.push({
-                directory: auditRoot,
-                relativeDirectory: relDir,
-                vulnerabilities: parsed.vulnerabilities,
-                error: parsed.error,
-                isWorkspaceMember: true,
-            });
-        }
-    }
-    // Audit stray packages
-    for (const strayDir of strayPackageDirs) {
-        counter++;
-        const relDir = path.relative(resolvedRoot, strayDir) || '.';
-        console.log(`(${counter}/${totalAuditRuns}) ${relDir} (stray package)`);
-        const hasLockFile = await fs.exists(path.join(strayDir, 'pnpm-lock.yaml'));
-        if (!hasLockFile) {
-            console.log('  No pnpm-lock.yaml found. Skipping audit.');
-            packages.push({
-                directory: strayDir,
-                relativeDirectory: relDir,
-                vulnerabilities: [],
-                error: 'No pnpm-lock.yaml found',
-                isWorkspaceMember: false,
-            });
-            continue;
-        }
-        const { stdout, stderr, error } = await runPnpmAudit(strayDir);
-        if (error) {
-            console.log(`  ✖ ${error}`);
-            packages.push({
-                directory: strayDir,
-                relativeDirectory: relDir,
-                vulnerabilities: [],
-                error,
-                isWorkspaceMember: false,
-            });
-        }
-        else {
-            const parsed = parseAuditOutput(stdout, stderr);
-            if (parsed.error) {
-                console.log(`  ⚠ ${parsed.error}`);
-            }
-            if (parsed.vulnerabilities.length > 0) {
-                for (const v of parsed.vulnerabilities) {
-                    const fixInfo = v.fixAvailable ? ' (fix available)' : '';
-                    console.log(`  ${v.severity.toUpperCase()} ${v.name}: ${v.title}${fixInfo}`);
-                }
-            }
-            else {
-                console.log('  No vulnerabilities found.');
-            }
-            packages.push({
-                directory: strayDir,
-                relativeDirectory: relDir,
-                vulnerabilities: parsed.vulnerabilities,
-                error: parsed.error,
-                isWorkspaceMember: false,
-            });
-        }
-    }
-    const { processedPackages, ignoredVulnerabilities } = filterIgnoredAdvisories(packages, ignoredAdvisories);
-    // Build result
-    const totalVulnerabilities = processedPackages.reduce((sum, p) => sum + p.vulnerabilities.length, 0);
-    const bySeverity = {};
-    for (const pkg of processedPackages) {
-        for (const v of pkg.vulnerabilities) {
-            bySeverity[v.severity] = (bySeverity[v.severity] ?? 0) + 1;
-        }
-    }
-    const packagesWithVulnerabilities = processedPackages.filter((p) => p.vulnerabilities.length > 0).length;
-    const strayPackages = strayPackageDirs.map((d) => path.relative(resolvedRoot, d) || '.');
-    const report = {
-        succeeded: totalVulnerabilities === 0,
-        rootPath: resolvedRoot,
-        packages: processedPackages,
-        totalVulnerabilities,
-        bySeverity,
-        packagesWithVulnerabilities,
-        strayPackages,
-        ignoredAdvisories: ignoredAdvisories?.length ? ignoredAdvisories : undefined,
-        ignoredVulnerabilities: ignoredVulnerabilities.length > 0 ? ignoredVulnerabilities : undefined,
-    };
-    // Summary output
-    if (totalVulnerabilities === 0) {
-        console.log('\nTotal: 0 vulnerabilities found. Everything is clear.');
-    }
-    else {
-        const sevSummary = Object.entries(bySeverity)
-            .sort(([, a], [, b]) => b - a)
-            .map(([sev, count]) => `${count} ${sev}`)
-            .join(', ');
-        console.log(`\n✖ Found ${totalVulnerabilities} vulnerabilities (${sevSummary}) in ${packagesWithVulnerabilities} packages.`);
-    }
-    if (strayPackages.length > 0) {
-        console.log(`⚠ ${strayPackages.length} stray package(s) found outside any pnpm workspace: ${strayPackages.join(', ')}`);
-    }
-    await saveReport(report, artifactsPath, fs);
-    return report;
-}
-async function saveReport(report, artifactsPath, fs) {
-    const outputFilePath = path.resolve(artifactsPath, shared_types_1.PNPM_AUDIT_REPORT_FILENAME);
-    const jsonContent = JSON.stringify(report, null, 2);
-    if (fs.writeFile) {
-        const outputDir = path.dirname(outputFilePath);
-        if (fs.mkdir) {
-            await fs.mkdir(outputDir, { recursive: true });
-        }
-        await fs.writeFile(outputFilePath, jsonContent);
-        console.log(`\n✅ Audit report saved to: ${outputFilePath}`);
-    }
-    else {
-        throw new Error('FileSystem does not support writeFile operation');
-    }
-}
-// #endregion
+Object.defineProperty(exports, "DEP_AUDIT_REPORT_FILENAME", ({ enumerable: true, get: function () { return shared_types_2.DEP_AUDIT_REPORT_FILENAME; } }));
 
 
 /***/ }),
@@ -36538,11 +36511,11 @@ async function saveReport(report, artifactsPath, fs) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PNPM_AUDIT_REPORT_FILENAME = exports.AuditSeverity = exports.NODE_VERSIONS_REPORT_FILENAME = exports.LOCK_FILES_REPORT_FILENAME = void 0;
+exports.DEP_AUDIT_REPORT_FILENAME = exports.AuditSeverity = exports.NODE_VERSIONS_REPORT_FILENAME = exports.LOCK_FILES_REPORT_FILENAME = void 0;
 exports.LOCK_FILES_REPORT_FILENAME = 'lock-files-report.json';
 exports.NODE_VERSIONS_REPORT_FILENAME = 'node-versions-report.json';
 //#endregion
-//#region pnpm-audit
+//#region dep-audit
 var AuditSeverity;
 (function (AuditSeverity) {
     AuditSeverity[AuditSeverity["Info"] = 0] = "Info";
@@ -36551,7 +36524,7 @@ var AuditSeverity;
     AuditSeverity[AuditSeverity["High"] = 3] = "High";
     AuditSeverity[AuditSeverity["Critical"] = 4] = "Critical";
 })(AuditSeverity || (exports.AuditSeverity = AuditSeverity = {}));
-exports.PNPM_AUDIT_REPORT_FILENAME = 'pnpm-audit-report.json';
+exports.DEP_AUDIT_REPORT_FILENAME = 'dep-audit-report.json';
 //#endregion
 
 
@@ -36607,7 +36580,7 @@ const LOCK_FILES = [
     'package-lock.json',
     'yarn.lock',
     'pnpm-lock.yaml',
-    'bun.lockb',
+    'bun.lock',
 ];
 async function validateLockFiles({ targetPath, artifactsPath, }) {
     const fileSystem = new file_system_1.NodeFileSystem();
@@ -37228,7 +37201,7 @@ async function run() {
         const resolvedArtifactsPath = path.resolve(basePath, artifactsPath);
         core.info(`Target path: ${targetPath}`);
         core.info(`Artifacts path: ${resolvedArtifactsPath}`);
-        const report = await (0, code_scanning_1.pnpmAudit)({
+        const report = await (0, code_scanning_1.depAudit)({
             targetPath,
             artifactsPath: resolvedArtifactsPath,
             ignoredAdvisories: config.ignoredAdvisories,
