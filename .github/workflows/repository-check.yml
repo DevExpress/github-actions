@@ -44,19 +44,19 @@ jobs:
           bun-version: latest
 
       - name: Validate lock files
-        uses: DevExpress/github-actions/validate-lock-files@release
+        uses: DevExpress/github-actions/validate-lock-files@f1352e686bbead79744f482fd79bdd68ac7c09e0 # release
         with:
           target: .
           artifacts: artifacts
 
       - name: Validate Node versions
-        uses: DevExpress/github-actions/validate-node-versions@release
+        uses: DevExpress/github-actions/validate-node-versions@f1352e686bbead79744f482fd79bdd68ac7c09e0 # release
         with:
           target: .
           artifacts: artifacts
 
       - name: Check dependency audit
-        uses: DevExpress/github-actions/dep-audit@release
+        uses: DevExpress/github-actions/dep-audit@f1352e686bbead79744f482fd79bdd68ac7c09e0 # release
         with:
           target: .
           artifacts: artifacts
