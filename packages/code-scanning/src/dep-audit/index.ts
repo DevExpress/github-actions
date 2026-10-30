@@ -103,8 +103,9 @@ async function runAudit(
   cwd: string,
 ): Promise<{ stdout: string; stderr: string; error?: string }> {
   try {
-    // --prefix: without it npm/pnpm audit the nearest parent package.json when cwd has a lock file but none
-    const { stdout, stderr } = await execFileAsync(packageManager, ['audit', '--json', '--prefix', cwd], {
+    // npm/pnpm audit the nearest parent package.json when cwd has a lock file but none; bun has no such flag
+    const variableArgs = { npm: ['--prefix', cwd], pnpm: ['--dir', cwd], bun: [] }[packageManager];
+    const { stdout, stderr } = await execFileAsync(packageManager, ['audit', '--json', ...variableArgs], {
       cwd,
       maxBuffer: 50 * 1024 * 1024,
     });
