@@ -12,7 +12,7 @@
 #   git clone --local /path/to/this/repo /tmp/publish-test
 #   cd /tmp/publish-test
 #   pnpm install --frozen-lockfile && pnpm dist
-#   BRANCH=... ACTION_DIRS=... WORKFLOW_FILES=... TAGS=... SHA=$(git rev-parse HEAD) GIT_USER_NAME=... GIT_USER_EMAIL=... ./scripts/publish-actions.sh
+#   BRANCH=... ACTION_DIRS=... WORKFLOW_FILES=... TAGS=... SHA=$(git rev-parse HEAD) ./scripts/publish-actions.sh
 #
 # Or, to test uncommitted edits to this script itself, run /path/to/this/repo/scripts/publish-actions.sh instead
 #
@@ -32,9 +32,11 @@ else
   git worktree add --orphan -b "$BRANCH" "$WORKTREE"
 fi
 
-# Copy each built action into place, replacing whatever was there before.
+# Remove every published action, so ones dropped from $ACTION_DIRS don't linger.
+find "$WORKTREE" -mindepth 1 -maxdepth 1 -type d ! -name .git ! -name .github -exec rm -rf {} +
+
+# Copy each built action into place.
 for name in $ACTION_DIRS; do
-  rm -rf "$WORKTREE/$name"
   cp -r "$name" "$WORKTREE/$name"
 done
 
@@ -47,13 +49,26 @@ done
 cd "$WORKTREE"
 git add -A
 
-if git diff --cached --quiet; then
+# Every publish ends with a pin commit, so compare with the commit before it
+if git diff --cached --quiet HEAD~1; then
   echo "No changes to publish."
   exit 0
 fi
 
-# $SHA must already be a resolved commit hash, not a ref like "HEAD"
-git -c user.name="$GIT_USER_NAME" -c user.email="$GIT_USER_EMAIL" commit -m "publish: ${MESSAGE:-$(git log -1 --format=%s "$SHA")}"
+# $SHA must already be a resolved commit hash, not a ref like "HEAD".
+# Publish commits keep the author and committer of the commit they publish.
+commit() {
+  git -c user.name="$(git log -1 --format=%cn "$SHA")" -c user.email="$(git log -1 --format=%ce "$SHA")" commit -a --author="$(git log -1 --format='%an <%ae>' "$SHA")" -m "$1"
+}
+commit "${MESSAGE:-$(git log -1 --format=%s "$SHA")}"
+
+# Pin our actions in the workflows to the commit just made: some repositories accept only full-length commit SHAs.
+ACTIONS_SHA=$(git rev-parse HEAD)
+for file in $WORKFLOW_FILES; do
+  sed "s|\(uses: DevExpress/github-actions/[^@]*\)@release|\1@$ACTIONS_SHA # release|" ".github/workflows/$file" > "$file.tmp" && mv "$file.tmp" ".github/workflows/$file"
+done
+commit "pin actions to ${ACTIONS_SHA:0:7}"
+
 git push origin "$BRANCH"
 
 # An empty $TAGS would otherwise turn `git push origin --force $TAGS` into
