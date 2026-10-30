@@ -9,12 +9,26 @@ import {
   type PackageAuditResult,
   type DepAuditReport,
 } from '../shared-types';
-import { detectBunWorkspaces, parseBunAuditOutput } from './bun';
-import type { PackageManager, WorkspaceInfo } from './common';
-import { detectNpmWorkspaces, parseNpmAuditOutput } from './npm';
-import { detectPnpmWorkspaces, parsePnpmAuditOutput } from './pnpm';
+import { parseBunAuditOutput } from './bun';
+import {
+  findLockFiles,
+  type PackageManager,
+  type ParsedAuditOutput,
+  type WorkspaceInfo,
+} from './common';
+import { parseNpmAuditOutput } from './npm';
+import { parsePnpmAuditOutput } from './pnpm';
 
 const execFileAsync = promisify(execFile);
+
+const PACKAGE_MANAGERS: Record<PackageManager, {
+  lockFile: string;
+  parse: (stdout: string, stderr: string) => ParsedAuditOutput;
+}> = {
+  pnpm: { lockFile: 'pnpm-lock.yaml', parse: parsePnpmAuditOutput },
+  npm: { lockFile: 'package-lock.json', parse: parseNpmAuditOutput },
+  bun: { lockFile: 'bun.lock', parse: parseBunAuditOutput },
+};
 
 // #region package.json discovery
 
@@ -40,7 +54,7 @@ async function findAllPackageJsonDirs(rootPath: string, fs: FileSystem): Promise
   }
 
   await walk(rootPath);
-  return [...new Set(results)].sort();
+  return results.sort();
 }
 
 function classifyPackages(
@@ -58,7 +72,7 @@ function classifyPackages(
     const resolved = path.resolve(pkgDir);
     let found = false;
     for (const ws of workspaces) {
-      if (ws.memberDirs.has(resolved) || isSubdirectory(ws.lockFileDir, resolved)) {
+      if (resolved === ws.lockFileDir || isSubdirectory(ws.lockFileDir, resolved)) {
         workspaceAuditRoots.get(ws)!.push(pkgDir);
         found = true;
         break;
@@ -165,28 +179,13 @@ export async function depAudit({
 
   console.log(`Scanning ${resolvedRoot} for pnpm/npm/bun packages...\n`);
 
-  const workspaces = [
-    ...(await detectPnpmWorkspaces(resolvedRoot, fs)),
-    ...(await detectNpmWorkspaces(resolvedRoot, fs)),
-    ...(await detectBunWorkspaces(resolvedRoot, fs)),
-  ];
-  const allPackageDirs = await findAllPackageJsonDirs(resolvedRoot, fs);
-
-  if (allPackageDirs.length === 0) {
-    console.log('No package.json files found. Nothing to audit.');
-    const report: DepAuditReport = {
-      succeeded: true,
-      rootPath: resolvedRoot,
-      packages: [],
-      totalVulnerabilities: 0,
-      bySeverity: {},
-      packagesWithVulnerabilities: 0,
-      strayPackages: [],
-    };
-    await saveReport(report, artifactsPath, fs);
-    return report;
+  const workspaces: WorkspaceInfo[] = [];
+  for (const [packageManager, { lockFile }] of Object.entries(PACKAGE_MANAGERS)) {
+    for (const lockFileDir of await findLockFiles(resolvedRoot, lockFile, fs)) {
+      workspaces.push({ packageManager: packageManager as PackageManager, lockFileDir });
+    }
   }
-
+  const allPackageDirs = await findAllPackageJsonDirs(resolvedRoot, fs);
   const { workspaceAuditRoots, strayPackageDirs } = classifyPackages(allPackageDirs, workspaces);
 
   const packages: PackageAuditResult[] = [];
@@ -203,43 +202,27 @@ export async function depAudit({
     );
 
     const { stdout, stderr, error } = await runAudit(ws.packageManager, auditRoot);
+    const parsed = error
+      ? { vulnerabilities: [], error }
+      : PACKAGE_MANAGERS[ws.packageManager].parse(stdout, stderr);
 
-    if (error) {
-      console.log(`  ✖ ${error}`);
-      packages.push({
-        directory: auditRoot,
-        relativeDirectory: relDir,
-        vulnerabilities: [],
-        error,
-        isWorkspaceMember: true,
-        packageManager: ws.packageManager,
-      });
-    } else {
-      const parsed = ws.packageManager === 'npm'
-        ? parseNpmAuditOutput(stdout)
-        : ws.packageManager === 'bun'
-          ? parseBunAuditOutput(stdout, stderr)
-          : parsePnpmAuditOutput(stdout, stderr);
-      if (parsed.error) {
-        console.log(`  ⚠ ${parsed.error}`);
-      }
-      if (parsed.vulnerabilities.length > 0) {
-        for (const v of parsed.vulnerabilities) {
-          const fixInfo = v.fixAvailable ? ' (fix available)' : '';
-          console.log(`  ${v.severity.toUpperCase()} ${v.name}: ${v.title}${fixInfo}`);
-        }
-      } else {
-        console.log('  No vulnerabilities found.');
-      }
-      packages.push({
-        directory: auditRoot,
-        relativeDirectory: relDir,
-        vulnerabilities: parsed.vulnerabilities,
-        error: parsed.error,
-        isWorkspaceMember: true,
-        packageManager: ws.packageManager,
-      });
+    if (parsed.error) {
+      console.log(`  ✖ ${parsed.error}`);
+    } else if (parsed.vulnerabilities.length === 0) {
+      console.log('  No vulnerabilities found.');
     }
+    for (const v of parsed.vulnerabilities) {
+      const fixInfo = v.fixAvailable ? ' (fix available)' : '';
+      console.log(`  ${v.severity.toUpperCase()} ${v.name}: ${v.title}${fixInfo}`);
+    }
+    packages.push({
+      directory: auditRoot,
+      relativeDirectory: relDir,
+      vulnerabilities: parsed.vulnerabilities,
+      error: parsed.error,
+      isWorkspaceMember: true,
+      packageManager: ws.packageManager,
+    });
   }
 
   // Audit stray packages
@@ -247,52 +230,14 @@ export async function depAudit({
     counter++;
     const relDir = path.relative(resolvedRoot, strayDir) || '.';
     console.log(`(${counter}/${totalAuditRuns}) ${relDir} (stray package)`);
-
-    const hasLockFile = await fs.exists(path.join(strayDir, 'pnpm-lock.yaml'));
-    if (!hasLockFile) {
-      console.log('  No lock file found. Skipping audit.');
-      packages.push({
-        directory: strayDir,
-        relativeDirectory: relDir,
-        vulnerabilities: [],
-        error: 'No lock file found',
-        isWorkspaceMember: false,
-      });
-      continue;
-    }
-
-    const { stdout, stderr, error } = await runAudit('pnpm', strayDir);
-
-    if (error) {
-      console.log(`  ✖ ${error}`);
-      packages.push({
-        directory: strayDir,
-        relativeDirectory: relDir,
-        vulnerabilities: [],
-        error,
-        isWorkspaceMember: false,
-      });
-    } else {
-      const parsed = parsePnpmAuditOutput(stdout, stderr);
-      if (parsed.error) {
-        console.log(`  ⚠ ${parsed.error}`);
-      }
-      if (parsed.vulnerabilities.length > 0) {
-        for (const v of parsed.vulnerabilities) {
-          const fixInfo = v.fixAvailable ? ' (fix available)' : '';
-          console.log(`  ${v.severity.toUpperCase()} ${v.name}: ${v.title}${fixInfo}`);
-        }
-      } else {
-        console.log('  No vulnerabilities found.');
-      }
-      packages.push({
-        directory: strayDir,
-        relativeDirectory: relDir,
-        vulnerabilities: parsed.vulnerabilities,
-        error: parsed.error,
-        isWorkspaceMember: false,
-      });
-    }
+    console.log('  No lock file found. Skipping audit.');
+    packages.push({
+      directory: strayDir,
+      relativeDirectory: relDir,
+      vulnerabilities: [],
+      error: 'No lock file found',
+      isWorkspaceMember: false,
+    });
   }
 
   const { processedPackages, ignoredVulnerabilities } = filterIgnoredAdvisories(

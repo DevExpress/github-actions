@@ -8,8 +8,6 @@ export type PackageManager = 'pnpm' | 'npm' | 'bun';
 export interface WorkspaceInfo {
   packageManager: PackageManager;
   lockFileDir: string;
-  memberPatterns: string[];
-  memberDirs: Set<string>;
 }
 
 export interface ParsedAuditOutput {
@@ -27,8 +25,6 @@ export function parseSeverityLevel(severity?: string): AuditSeverity {
       return AuditSeverity.Moderate;
     case 'low':
       return AuditSeverity.Low;
-    case 'info':
-      return AuditSeverity.Info;
     default:
       return AuditSeverity.Info;
   }
