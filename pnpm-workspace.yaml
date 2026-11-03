@@ -16,4 +16,4 @@ catalog:
   vitest: ^5.0.3
 
 overrides:
-  brace-expansion@<1.1.21: ^1.1.21
+  rimraf>glob: ^14.0.2
