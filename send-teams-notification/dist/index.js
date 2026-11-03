@@ -5876,7 +5876,7 @@ module.exports = function setToStringTag(object, value) {
 
 /***/ }),
 
-/***/ 5159:
+/***/ 4141:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 var debug;
@@ -5898,7 +5898,7 @@ module.exports = function () {
 
 /***/ }),
 
-/***/ 2683:
+/***/ 1354:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 var url = __nccwpck_require__(7016);
@@ -5907,7 +5907,7 @@ var http = __nccwpck_require__(8611);
 var https = __nccwpck_require__(5692);
 var Writable = (__nccwpck_require__(2203).Writable);
 var assert = __nccwpck_require__(2613);
-var debug = __nccwpck_require__(5159);
+var debug = __nccwpck_require__(4141);
 
 // Preventive platform detection
 // istanbul ignore next
@@ -6214,7 +6214,7 @@ RedirectableRequest.prototype._sanitizeOptions = function (options) {
     }
   }
   // Ensure sensitive headers are always present
-  if (!isArray(options.sensitiveHeaders)) {
+  if (!Array.isArray(options.sensitiveHeaders)) {
     options.sensitiveHeaders = [];
   }
 
@@ -6590,10 +6590,6 @@ function isSubdomain(subdomain, domain) {
   assert(isString(subdomain) && isString(domain));
   var dot = subdomain.length - domain.length - 1;
   return dot > 0 && subdomain[dot] === "." && subdomain.endsWith(domain);
-}
-
-function isArray(value) {
-  return value instanceof Array;
 }
 
 function isString(value) {
@@ -38096,7 +38092,7 @@ var https = __nccwpck_require__(5692);
 var http2 = __nccwpck_require__(5675);
 var util = __nccwpck_require__(9023);
 var path = __nccwpck_require__(6928);
-var followRedirects = __nccwpck_require__(2683);
+var followRedirects = __nccwpck_require__(1354);
 var zlib = __nccwpck_require__(3106);
 var stream = __nccwpck_require__(2203);
 var events = __nccwpck_require__(4434);
